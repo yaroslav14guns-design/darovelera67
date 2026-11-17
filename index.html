@@ -1,0 +1,1932 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Привет, Лера</title>
+<style>
+  :root {
+    --bg-image: url("https://i.pinimg.com/originals/e2/60/6d/e2606d99d16b1bea1e8150538d579a09.gif");
+    --wave-front: #F5F0F0;
+    --wave-back: rgba(245, 240, 240, 0.6);
+    --greeting-color: #F5F0F0;
+    --greeting-shadow: drop-shadow(0 0 15px rgba(245, 240, 240, 0.4)) drop-shadow(0 0 40px rgba(245, 240, 240, 0.2));
+    --puddle-text-color: #000;
+    --ctrl-bg: rgba(0, 0, 0, .75);
+    --ctrl-border: rgba(255, 255, 255, .14);
+    --ctrl-hover-bg: rgba(20, 20, 20, .92);
+    --ctrl-hover-border: rgba(245, 240, 240, .7);
+    --ctrl-hover-shadow: 0 0 18px rgba(245, 240, 240, .4);
+    --ctrl-icon-color: #F5F0F0;
+    --slider-thumb: #F5F0F0;
+    --corner-btn-bg: #000;
+    --corner-btn-border: #ffffff;
+    --corner-btn-text: #F5F0F0;
+    --corner-btn-text-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    --corner-btn-shadow: 0 0 15px rgba(255, 255, 255, 0.4), 0 10px 30px rgba(0, 0, 0, 0.6);
+    --corner-btn-hover-shadow: 0 0 25px rgba(255, 255, 255, 0.8), 0 15px 40px rgba(0, 0, 0, 0.8);
+    --key-color: #000000;
+    --hint-shadow: 0 0 5px rgba(255, 255, 255, 0.9), 0 4px 6px rgba(0, 0, 0, 0.5);
+    --book-item-bg: rgba(255, 255, 255, 0.06);
+    --book-item-bg-hover: rgba(255, 255, 255, 0.12);
+    --sb-track: rgba(255, 255, 255, 0.06);
+    --sb-thumb: rgba(245, 240, 240, 0.35);
+    --sb-thumb-hover: rgba(245, 240, 240, 0.7);
+  }
+  body.dark-theme {
+    --bg-image: url("https://99px.ru/sstorage/86/2018/06/image_861406181006133917920.gif");
+    --wave-front: #4B0082;
+    --wave-back: rgba(75, 0, 130, 0.6);
+    --greeting-color: #4B0082;
+    --greeting-shadow: drop-shadow(0 0 15px rgba(75, 0, 130, 0.6)) drop-shadow(0 0 40px rgba(75, 0, 130, 0.4));
+    --ctrl-bg: rgba(15, 5, 30, .85);
+    --ctrl-border: rgba(138, 43, 226, .3);
+    --ctrl-hover-bg: rgba(30, 10, 50, .95);
+    --ctrl-hover-border: rgba(138, 43, 226, .8);
+    --ctrl-hover-shadow: 0 0 18px rgba(138, 43, 226, .6);
+    --slider-thumb: #c084fc;
+    --corner-btn-bg: #4B0082;
+    --corner-btn-border: #000000;
+    --corner-btn-text: #000000;
+    --corner-btn-text-shadow: none;
+    --corner-btn-shadow: 0 0 15px rgba(0, 0, 0, 0.8), 0 10px 30px rgba(0, 0, 0, 0.7), 0 0 25px rgba(75, 0, 130, 0.5);
+    --corner-btn-hover-shadow: 0 0 25px rgba(0, 0, 0, 0.9), 0 15px 40px rgba(0, 0, 0, 0.9), 0 0 35px rgba(138, 43, 226, 0.9);
+    --key-color: #c084fc;
+    --hint-shadow: 0 0 5px rgba(0, 0, 0, 0.9), 0 4px 6px rgba(0, 0, 0, 0.7);
+    --book-item-bg: rgba(0, 0, 0, 0.15);
+    --book-item-bg-hover: rgba(0, 0, 0, 0.3);
+    --sb-track: rgba(0, 0, 0, 0.12);
+    --sb-thumb: rgba(0, 0, 0, 0.45);
+    --sb-thumb-hover: rgba(0, 0, 0, 0.75);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 100%; height: 100%; overflow: hidden; background: #05000a; }
+  body::before { content: ""; position: fixed; inset: 0; background: #05000a var(--bg-image) center center / cover no-repeat; z-index: 0; pointer-events: none; transition: background 0.5s ease; }
+  body::after { content: ""; position: fixed; inset: 0; background: radial-gradient(ellipse at center, rgba(0,0,0,.15) 0%, rgba(0,0,0,.45) 100%); z-index: 1; pointer-events: none; }
+  #rain-canvas-container { position: fixed; inset: 0; z-index: 2; pointer-events: none; opacity: 0; transition: opacity 1s ease; }
+  body.dark-theme #rain-canvas-container { opacity: 1; }
+  #rain-canvas-container canvas { width: 100%; height: 100%; display: block; }
+
+  .puddle-container { position: fixed; bottom: 0; left: 0; width: 100%; height: 120px; z-index: 5; transform: translateY(100%); display: flex; align-items: flex-end; justify-content: center; padding-bottom: 15px; background: transparent; }
+  body.start-animation .puddle-container { animation: puddleUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 2.2s forwards; }
+  @keyframes puddleUp { to { transform: translateY(0); } }
+
+  .svg-waves { position: absolute; bottom: 0; left: 0; width: 100%; height: 100%; overflow: hidden; pointer-events: none; z-index: 1; }
+  .wave { position: absolute; bottom: 0; left: 0; width: 200%; height: 100px; will-change: transform; transition: fill 0.4s ease; }
+  .wave-back { fill: var(--wave-back); animation: waveMove 12s linear infinite; }
+  .wave-front { fill: var(--wave-front); animation: waveMove 8s linear infinite reverse; }
+  @keyframes waveMove { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+  .puddle-text { position: relative; color: var(--puddle-text-color); font-family: "Segoe UI", Arial, sans-serif; font-size: clamp(10px, 2vw, 14px); font-weight: 600; text-align: center; line-height: 1.3; margin: 0; opacity: 0; z-index: 10; padding: 0 20px; }
+  body.start-animation .puddle-text { animation: fadeInText 1s ease 3s forwards, fadeOutText 1s ease 6s forwards; }
+  @keyframes fadeInText { 0% { opacity: 0; } 100% { opacity: 1; } }
+  @keyframes fadeOutText { 0% { opacity: 1; } 100% { opacity: 0; } }
+
+  .text-base, .test-text, .prize-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -150vh); opacity: 0; font-family: "Arial Black", "Segoe UI Black", "Helvetica Neue", Arial, sans-serif; font-weight: 900; line-height: 1.1; text-align: center; letter-spacing: .01em; width: 100%; display: flex; flex-wrap: nowrap; justify-content: center; align-items: center; white-space: nowrap; color: var(--greeting-color); filter: url(#goo) var(--greeting-shadow); transition: color 0.4s ease, filter 0.4s ease; pointer-events: none; will-change: transform, opacity; }
+  .text-base { z-index: 14; font-size: clamp(2.2rem, 9vw, 8rem); }
+  .test-text { z-index: 15; font-size: clamp(1.2rem, 5vw, 5.5rem); }
+  .prize-text { z-index: 16; font-size: clamp(1rem, 3.8vw, 4.5rem); }
+  .text-base.initial { transform: translate(-50%, -50%); opacity: 1; }
+  .text-base.visible, .test-text.visible, .prize-text.visible { animation: flowDown 1.5s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+  @keyframes flowDown { 0% { transform: translate(-50%, -150vh); opacity: 0; } 100% { transform: translate(-50%, -50%); opacity: 1; } }
+  .text-base.reverse-melt, .test-text.reverse-melt, .prize-text.reverse-melt { animation: floatUp 1.2s cubic-bezier(0.4, 0, 0.8, 0.3) forwards; }
+  @keyframes floatUp { 0% { transform: translate(-50%, 40vh) scaleY(1.5); opacity: 0; } 100% { transform: translate(-50%, -50%) scaleY(1); opacity: 1; } }
+  .text-base.skip-anim, .test-text.skip-anim, .prize-text.skip-anim { animation: none !important; transform: translate(-50%, -50%) !important; opacity: 1 !important; }
+
+  .char { position: relative; display: inline-block; }
+  .drip { position: absolute; top: 50%; background: var(--greeting-color); border-radius: 10px 10px 50% 50% / 10px 10px 100% 100%; transform-origin: top center; transform: scaleY(0); will-change: transform; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), background 0.4s ease; }
+  .text-base.is-melting .drip { animation: dripStretch var(--dur, 1.2s) cubic-bezier(0.4, 0, 0.2, 1) var(--delay, 1.5s) forwards; }
+  .test-text.dripping .drip, .prize-text.dripping .drip { animation: dripStretch var(--dur, 1.2s) cubic-bezier(0.4, 0, 0.2, 1) 0s forwards; }
+  .text-base.drips-static .drip, .test-text.drips-static .drip, .prize-text.drips-static .drip { transform: scaleY(1); }
+  .d1 { left: 20%; width: clamp(10px, 1.5vw, 16px); height: 180px; --delay: 1.5s; --dur: 1.2s; }
+  .d2 { left: 75%; width: clamp(8px, 1.2vw, 14px); height: 130px; --delay: 1.6s; --dur: 1.0s; }
+  .d3 { left: 40%; width: clamp(12px, 2vw, 20px); height: 220px; --delay: 1.5s; --dur: 1.4s; }
+  .d4 { left: 60%; width: clamp(6px, 1vw, 10px); height: 160px; --delay: 1.7s; --dur: 1.1s; }
+  .d5 { left: 30%; width: clamp(14px, 1.8vw, 18px); height: 200px; --delay: 1.6s; --dur: 1.3s; }
+  @keyframes dripStretch { 0% { transform: scaleY(0); } 100% { transform: scaleY(1); } }
+  .text-base.melted, .test-text.melted, .prize-text.melted { animation: meltTest 1.2s cubic-bezier(0.4, 0, 0.8, 0.3) forwards; }
+  @keyframes meltTest { 0% { transform: translate(-50%, -50%) scaleY(1); opacity: 1; } 100% { transform: translate(-50%, 40vh) scaleY(1.5); opacity: 0; } }
+
+  .control-panel { position: fixed; top: 18px; z-index: 100; display: flex; align-items: center; gap: 10px; }
+  .control-panel.left { left: 22px; flex-direction: row; }
+  .control-panel.right { right: 22px; flex-direction: column; }
+  .icon-btn { width: 46px; height: 46px; border-radius: 50%; background: var(--ctrl-bg); border: 1px solid var(--ctrl-border); cursor: pointer; display: grid; place-items: center; padding: 0; color: var(--ctrl-icon-color); transition: background .3s, border-color .3s, box-shadow .3s, color .3s, opacity .3s, transform .3s; }
+  .icon-btn:hover { background: var(--ctrl-hover-bg); border-color: var(--ctrl-hover-border); box-shadow: var(--ctrl-hover-shadow); }
+  .icon-sun { display: none; }
+  body.dark-theme .icon-moon { display: none; }
+  body.dark-theme .icon-sun { display: block; }
+  .nav-btn { opacity: 1; transform: scale(1); pointer-events: auto; }
+  .nav-btn.hidden { opacity: 0; transform: scale(0.7); pointer-events: none; }
+
+  .icon-hints { width: 22px; height: 22px; background-color: var(--ctrl-icon-color); -webkit-mask-image: url("https://cdn-icons-png.flaticon.com/512/4052/4052730.png"); mask-image: url("https://cdn-icons-png.flaticon.com/512/4052/4052730.png"); -webkit-mask-size: contain; mask-size: contain; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; -webkit-mask-position: center; mask-position: center; transition: background-color 0.4s ease, opacity 0.3s ease; }
+  .icon-btn.disabled .icon-hints { opacity: 0.4; }
+
+  .volume-wrap-trigger { display: flex; flex-direction: column; align-items: center; gap: 10px; position: relative; }
+  .volume-slider-wrap { opacity: 0; transform: translateY(-10px); pointer-events: none; transition: opacity .3s ease, transform .3s ease, background .4s ease, border-color .4s ease; background: var(--ctrl-bg); border: 1px solid var(--ctrl-border); border-radius: 20px; padding: 14px 8px; box-shadow: 0 8px 24px rgba(0, 0, 0, .6); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
+  .volume-wrap-trigger:hover .volume-slider-wrap, .volume-slider-wrap:hover { opacity: 1; transform: translateY(0); pointer-events: auto; }
+  .volume-slider { -webkit-appearance: none; appearance: none; writing-mode: vertical-lr; direction: rtl; width: 8px; height: 130px; background: rgba(255, 255, 255, .18); border-radius: 4px; outline: none; cursor: pointer; padding: 0; margin: 0; }
+  .volume-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 20px; height: 20px; background: var(--slider-thumb); border: 2px solid rgba(0, 0, 0, .5); border-radius: 50%; cursor: pointer; box-shadow: 0 0 10px rgba(245, 240, 240, .5); transition: transform .15s, background .4s ease; }
+  .volume-slider::-webkit-slider-thumb:hover { transform: scale(1.12); }
+  .volume-slider::-moz-range-thumb { width: 18px; height: 18px; background: var(--slider-thumb); border: 2px solid rgba(0, 0, 0, .5); border-radius: 50%; cursor: pointer; box-shadow: 0 0 10px rgba(245, 240, 240, .5); transition: background .4s ease; }
+  .volume-slider::-moz-range-track { background: transparent; }
+  .icon-muted { display: none; }
+  .muted .icon-sound { display: none; }
+  .muted .icon-muted { display: block; }
+
+  .collected-key-badge { position: absolute; top: 23px; right: 100%; margin-right: 15px; width: 34px; height: 34px; opacity: 0; transform: translateY(-50%) scale(0); transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); pointer-events: none; }
+  .collected-key-badge.show { opacity: 1; transform: translateY(-50%) scale(1); }
+
+  .corner-buttons-wrap { position: fixed; top: 15vh; bottom: 15vh; left: 5vw; right: 5vw; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: clamp(20px, 4vw, 60px); z-index: 50; pointer-events: none; }
+  .corner-btn { position: relative; width: 100%; height: 100%; background: var(--corner-btn-bg); border: 4px solid var(--corner-btn-border); border-radius: 30px; opacity: 0; transform: scale(0.85); box-shadow: var(--corner-btn-shadow); cursor: pointer; pointer-events: none; color: var(--corner-btn-text); text-shadow: var(--corner-btn-text-shadow); font-family: "Arial Black", "Segoe UI Black", "Helvetica Neue", Arial, sans-serif; font-weight: 900; font-size: clamp(2rem, 6vw, 6rem); text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; justify-content: center; transition: opacity 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275), transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275), background 0.4s ease, border-color 0.4s ease, box-shadow 0.3s ease, color 0.4s ease, text-shadow 0.4s ease; }
+  .corner-btn.show { opacity: 1; transform: scale(1); pointer-events: auto; }
+  .corner-btn:hover { transform: scale(1.02); box-shadow: var(--corner-btn-hover-shadow); }
+
+  .music-page-wrapper, .films-page-wrapper, .games-page-wrapper, .clothes-page-wrapper { position: fixed; top: 15vh; bottom: 15vh; left: 5vw; right: 5vw; display: flex; gap: clamp(20px, 4vw, 60px); z-index: 45; opacity: 0; transform: translateY(30px); pointer-events: none; transition: opacity 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275), transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+  .music-page-wrapper.active, .films-page-wrapper.active, .games-page-wrapper.active, .clothes-page-wrapper.active { opacity: 1; transform: translateY(0); pointer-events: auto; }
+  .music-square { flex: 0 0 42vw; height: 100%; background: var(--corner-btn-bg); border: 4px solid var(--corner-btn-border); border-radius: 30px; box-shadow: var(--corner-btn-shadow); display: flex; align-items: center; justify-content: center; padding: 20px; transition: background 0.4s ease, border-color 0.4s ease; }
+  .music-question { color: var(--corner-btn-text); font-family: "Arial Black", "Segoe UI Black", "Helvetica Neue", Arial, sans-serif; font-size: clamp(1.5rem, 3vw, 3rem); text-align: center; text-transform: uppercase; transition: opacity 0.5s ease; }
+  .music-side-rects { flex: 1; display: flex; flex-direction: column; gap: clamp(10px, 2vh, 25px); height: 100%; }
+  .side-rect { flex: 1; background: var(--corner-btn-bg); border: 4px solid var(--corner-btn-border); border-radius: 30px; box-shadow: var(--corner-btn-shadow); display: flex; align-items: center; justify-content: center; color: var(--corner-btn-text); font-family: "Arial Black", "Segoe UI Black", "Helvetica Neue", Arial, sans-serif; font-size: clamp(0.9rem, 1.8vw, 1.8rem); text-transform: uppercase; transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease, opacity 0.5s ease; cursor: default; padding: 10px; text-align: center; }
+  .side-rect.clickable { cursor: pointer; }
+  .side-rect.clickable:hover { background: rgba(255, 255, 255, 0.1); }
+  .side-rect.correct { background: #2ecc71 !important; border-color: #2ecc71 !important; color: #fff !important; text-shadow: none !important; }
+  .side-rect.incorrect { background: #e74c3c !important; border-color: #e74c3c !important; color: #fff !important; text-shadow: none !important; }
+  .fade-out { opacity: 0 !important; }
+
+  .music-anim-lock, .films-anim-lock, .games-anim-lock, .clothes-anim-lock { position: absolute; top: 20px; right: 25px; width: clamp(30px, 4vw, 45px); height: clamp(30px, 4vw, 45px); color: var(--corner-btn-text); display: flex; justify-content: center; align-items: center; pointer-events: none; opacity: 1; transition: opacity 0.3s ease; }
+  .music-anim-lock svg, .films-anim-lock svg, .games-anim-lock svg, .clothes-anim-lock svg { position: absolute; width: 100%; height: 100%; overflow: visible; }
+  .music-anim-lock .key-svg, .films-anim-lock .key-svg, .games-anim-lock .key-svg, .clothes-anim-lock .key-svg { transform-origin: 12px 15.5px; opacity: 0; }
+  .music-anim-lock .shackle-svg, .films-anim-lock .shackle-svg, .games-anim-lock .shackle-svg, .clothes-anim-lock .shackle-svg { transform-origin: 7px 11px; }
+  .music-anim-lock.animating, .films-anim-lock.animating, .games-anim-lock.animating, .clothes-anim-lock.animating { animation: lockFadeOutAll 0.8s ease 3.5s forwards; }
+  .music-anim-lock.animating .key-svg, .films-anim-lock.animating .key-svg, .games-anim-lock.animating .key-svg, .clothes-anim-lock.animating .key-svg { animation: keyAction 2s cubic-bezier(0.4, 0, 0.2, 1) 1s forwards; }
+  .music-anim-lock.animating .shackle-svg, .films-anim-lock.animating .shackle-svg, .games-anim-lock.animating .shackle-svg, .clothes-anim-lock.animating .shackle-svg { animation: shackleOpen 0.5s ease-out 2.5s forwards; }
+  .music-anim-lock.unlocked, .films-anim-lock.unlocked, .games-anim-lock.unlocked, .clothes-anim-lock.unlocked { opacity: 0; }
+  @keyframes keyAction { 0% { transform: translateX(50px) rotate(0deg); opacity: 0; } 25% { transform: translateX(0px) rotate(0deg); opacity: 1; } 50% { transform: translateX(0px) rotate(0deg); opacity: 1; } 75% { transform: translateX(0px) rotate(-90deg); opacity: 1; } 100% { transform: translateX(0px) rotate(-90deg); opacity: 1; } }
+  @keyframes shackleOpen { 0% { transform: translateY(0) rotate(0deg); } 100% { transform: translateY(-6px) rotate(-30deg); } }
+  @keyframes lockFadeOutAll { 0% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(0.6); } }
+
+  .clothes-page-wrapper { position: fixed; top: 15vh; bottom: 15vh; left: 5vw; right: 5vw; display: flex; align-items: center; justify-content: center; z-index: 45; opacity: 0; transform: scale(0.95); pointer-events: none; transition: opacity 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275), transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+  .clothes-page-wrapper.active { opacity: 1; transform: scale(1); pointer-events: auto; }
+  .clothes-card { background: var(--corner-btn-bg); border: 4px solid var(--corner-btn-border); border-radius: 30px; box-shadow: var(--corner-btn-shadow); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: clamp(15px, 3vw, 30px); gap: clamp(10px, 1.5vh, 20px); width: 100%; max-width: 800px; height: 100%; box-sizing: border-box; overflow: hidden; }
+  .clothes-image { width: 100%; max-height: 50vh; object-fit: contain; border-radius: 20px; border: 3px solid var(--corner-btn-border); box-shadow: 0 10px 30px rgba(0,0,0,0.5); background: rgba(0,0,0,0.1); }
+  .clothes-question { color: var(--corner-btn-text); font-family: "Arial Black", "Segoe UI Black", "Helvetica Neue", Arial, sans-serif; font-size: clamp(1.5rem, 3vw, 2.5rem); text-align: center; text-transform: uppercase; margin: 0; }
+  .clothes-options { display: flex; gap: clamp(10px, 3vw, 30px); width: 100%; justify-content: center; flex-wrap: wrap; }
+  .clothes-option-btn { flex: 1; min-width: 200px; padding: clamp(12px, 1.5vh, 18px); background: var(--corner-btn-bg); border: 4px solid var(--corner-btn-border); border-radius: 20px; color: var(--corner-btn-text); font-family: "Arial Black", "Segoe UI Black", "Helvetica Neue", Arial, sans-serif; font-size: clamp(1rem, 2vw, 1.5rem); cursor: pointer; text-align: center; transition: all 0.3s ease; }
+  .clothes-option-btn:hover { transform: scale(1.05); box-shadow: var(--corner-btn-hover-shadow); }
+  .clothes-option-btn.correct { background: #2ecc71 !important; border-color: #2ecc71 !important; color: #fff !important; text-shadow: none !important; }
+  .clothes-option-btn.incorrect { background: #e74c3c !important; border-color: #e74c3c !important; color: #fff !important; text-shadow: none !important; }
+
+  /* Кнопка-ссылка, появляющаяся при правильном ответе */
+  .clothes-prize-btn {
+    display: none;
+    padding: clamp(20px, 4vh, 40px) clamp(40px, 8vw, 100px);
+    background: var(--corner-btn-bg);
+    border: 4px solid var(--corner-btn-border);
+    border-radius: 30px;
+    box-shadow: var(--corner-btn-shadow);
+    color: var(--corner-btn-text);
+    text-shadow: var(--corner-btn-text-shadow);
+    font-family: "Arial Black", "Segoe UI Black", "Helvetica Neue", Arial, sans-serif;
+    font-weight: 900;
+    font-size: clamp(1.4rem, 3.5vw, 3rem);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    text-decoration: none;
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.4s ease, border-color 0.4s ease, color 0.4s ease;
+    animation: prizeBtnPop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  .clothes-prize-btn.show { display: inline-block; }
+  .clothes-prize-btn:hover {
+    transform: scale(1.05);
+    box-shadow: var(--corner-btn-hover-shadow);
+  }
+  @keyframes prizeBtnPop {
+    0% { opacity: 0; transform: scale(0.6); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+
+  .sound-hint { position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%); z-index: 30; font-family: "Segoe UI", Arial, sans-serif; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: rgba(255, 255, 255, .45); text-shadow: 0 2px 10px #000; pointer-events: none; transition: opacity 1.2s ease; }
+  .sound-hint.hide { opacity: 0; }
+
+  .dog-scene { position: fixed; inset: 0; z-index: 55; pointer-events: none; display: none; overflow: visible; }
+  .dog-scene.active { display: block; }
+  .dog-container { position: fixed; width: 200px; height: 150px; opacity: 0; z-index: 47; pointer-events: none; transition: top 2s cubic-bezier(0.4, 0.05, 0.55, 0.95), left 2s cubic-bezier(0.4, 0.05, 0.55, 0.95), opacity 0.4s ease; }
+  .dog-container.phase-1 { opacity: 1; }
+  .dog-container.phase-2 { transition: top 3s cubic-bezier(0.4, 0.05, 0.55, 0.95), left 3s cubic-bezier(0.4, 0.05, 0.55, 0.95); }
+  .dog-container.clickable { pointer-events: auto; cursor: pointer; }
+  .dog-name-tag { position: absolute; top: -20px; left: 50%; transform: translateX(-50%); padding: 2px 10px; font-family: "Comic Sans MS", "Segoe UI", sans-serif; font-size: 13px; font-weight: 700; color: var(--corner-btn-text); background: var(--corner-btn-bg); border: 1.5px solid var(--corner-btn-border); border-radius: 10px; white-space: nowrap; z-index: 2; }
+  .bark-bubble { position: absolute; top: -60px; left: 50%; transform: translateX(-50%); padding: 4px 12px; background: #fff; color: #000; font-family: "Arial Black", "Segoe UI", sans-serif; font-size: 14px; font-weight: 900; border-radius: 15px; border: 2px solid #000; white-space: nowrap; opacity: 0; z-index: 3; }
+  .bark-bubble.show { animation: barkPop 0.8s ease-out; }
+  @keyframes barkPop { 0% { opacity: 0; transform: translateX(-50%) scale(0.5); } 30% { opacity: 1; transform: translateX(-50%) scale(1.1); } 60% { opacity: 1; transform: translateX(-50%) scale(1); } 100% { opacity: 0; transform: translateX(-50%) scale(0.9); } }
+  .dog-svg { width: 100%; height: 100%; overflow: visible; }
+  .dog-container.walking .leg-front-1 { animation: legUp 0.4s infinite alternate; }
+  .dog-container.walking .leg-front-2 { animation: legUp 0.4s infinite alternate-reverse; }
+  .dog-container.walking .leg-back-1 { animation: legUp 0.4s infinite alternate-reverse; }
+  .dog-container.walking .leg-back-2 { animation: legUp 0.4s infinite alternate; }
+  @keyframes legUp { from { transform: translateY(0); } to { transform: translateY(-15px); } }
+  .dog-container.walking .dog-tail { transform-origin: 140px 90px; animation: tailWag 0.25s infinite alternate; }
+  @keyframes tailWag { from { transform: rotate(-10deg); } to { transform: rotate(15deg); } }
+  .dog-key-mouth { transition: opacity 0.3s ease; }
+
+  .raft-wrapper { position: fixed; bottom: 10px; right: -200px; width: 160px; height: 60px; opacity: 0; z-index: 48; pointer-events: none; transition: right 1.5s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.5s ease; }
+  .raft-wrapper.floating { right: 15vw; opacity: 1; }
+  .raft-wrapper.floating .raft-svg { animation: raftSway 3.5s ease-in-out infinite; transform-origin: center bottom; }
+  @keyframes raftSway { 0%, 100% { transform: translateY(0) rotate(-1.2deg); } 50% { transform: translateY(-4px) rotate(1.2deg); } }
+  .raft-svg { width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+  .raft-key { opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+  .raft-key.visible { opacity: 1; pointer-events: all; cursor: pointer; }
+
+  .flying-key { position: fixed; width: 34px; height: 34px; z-index: 200; display: none; pointer-events: none; transition: left 1s cubic-bezier(0.4, 0, 0.2, 1), top 1s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease; }
+
+  .games-wave-key { position: fixed; bottom: 26px; left: -90px; width: 44px; height: 44px; z-index: 60; opacity: 0; pointer-events: none; transition: left 2.5s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.5s ease; }
+  .games-wave-key.floating { left: 13vw; opacity: 1; pointer-events: auto; cursor: pointer; }
+  .games-wave-key .games-key-svg { position: relative; width: 100%; height: 100%; filter: drop-shadow(var(--hint-shadow)); animation: waveKeyBob 2.2s ease-in-out infinite; }
+  @keyframes waveKeyBob { 0%, 100% { transform: translateY(0) rotate(-4deg); } 50% { transform: translateY(-9px) rotate(4deg); } }
+
+  .rope-container { position: fixed; top: -110vh; left: 50%; transform: translateX(-50%); z-index: 150; transition: top 1.5s cubic-bezier(0.4, 0, 0.2, 1); }
+  .rope-container.drop { top: -66.66vh; animation: ropeSway 3s ease-in-out infinite alternate; transform-origin: top center; }
+  @keyframes ropeSway { 0% { transform: translateX(-50%) rotate(-2.5deg); } 100% { transform: translateX(-50%) rotate(2.5deg); } }
+  .rope-line { width: 6px; height: 100vh; background: repeating-linear-gradient(45deg, #8b5a2b, #8b5a2b 5px, #a06b40 5px, #a06b40 10px); box-shadow: 0 0 10px rgba(0,0,0,0.5); border-radius: 3px; position: relative; }
+  .rope-key { width: 34px; height: 16px; position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); cursor: pointer; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5)); pointer-events: none; transition: opacity 0.3s ease, transform 0.2s ease; z-index: 2; }
+  .rope-container.drop .rope-key { pointer-events: auto; }
+  .rope-key:hover { transform: translateX(-50%) scale(1.1); }
+
+  .hint-arrow { position: absolute; pointer-events: none; animation: bounceArrow 1s infinite alternate; z-index: 10; opacity: 0; transition: opacity 0.3s ease; color: var(--key-color); filter: drop-shadow(var(--hint-shadow)); }
+  .hint-arrow.show { opacity: 1; }
+  @keyframes bounceArrow { from { transform: translateY(0); } to { transform: translateY(-12px); } }
+
+  .dev-trigger { position: fixed; bottom: 8px; left: 8px; width: 30px; height: 30px; z-index: 9999; cursor: pointer; display: flex; align-items: center; justify-content: center; font: 900 24px "Arial Black", "Segoe UI Black", "Helvetica Neue", sans-serif; color: #F5F0F0; opacity: 0; transition: opacity 0.2s ease, color 0.4s ease, text-shadow 0.4s ease; user-select: none; text-shadow: 0 0 10px rgba(245, 240, 240, 0.5), 0 2px 6px rgba(0, 0, 0, 0.9); }
+  .dev-trigger:hover { opacity: 0.9; }
+  body.start-animation .dev-trigger { color: #1a0033; text-shadow: 0 0 8px rgba(75, 0, 130, 0.55), 0 2px 6px rgba(0, 0, 0, 0.35); }
+  body.start-animation.dark-theme .dev-trigger { color: #F5F0F0; text-shadow: 0 0 10px rgba(245, 240, 240, 0.6), 0 2px 6px rgba(0, 0, 0, 0.9); }
+
+  .dev-box { position: fixed; bottom: 8px; left: 44px; z-index: 9999; display: none; }
+  .dev-box.open { display: block; }
+  .dev-box input { background: rgba(0,0,0,0.9); border: 1px solid rgba(255,255,255,0.35); color: #fff; padding: 5px 10px; border-radius: 5px; font: 13px monospace; width: 160px; outline: none; box-shadow: 0 4px 16px rgba(0,0,0,0.7); }
+
+  .book-overlay { position: fixed; top: 76px; bottom: 132px; left: 22px; right: 22px; z-index: 90; background: var(--corner-btn-bg); border: 4px solid var(--corner-btn-border); border-radius: 30px; box-shadow: var(--corner-btn-shadow); color: var(--corner-btn-text); padding: clamp(20px, 4vw, 50px); display: flex; flex-direction: column; opacity: 0; transform: scale(0.94) translateY(20px); pointer-events: none; transition: opacity 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), background 0.4s ease, border-color 0.4s ease; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--sb-thumb) var(--sb-track); scrollbar-gutter: stable; padding-right: clamp(24px, 4vw, 54px); }
+  .book-overlay::-webkit-scrollbar { width: 10px; }
+  .book-overlay::-webkit-scrollbar-track { background: var(--sb-track); border-radius: 10px; margin: 18px 0; }
+  .book-overlay::-webkit-scrollbar-thumb { background: var(--sb-thumb); border-radius: 10px; border: 2px solid transparent; background-clip: padding-box; transition: background 0.2s ease; }
+  .book-overlay::-webkit-scrollbar-thumb:hover { background: var(--sb-thumb-hover); background-clip: padding-box; }
+  .book-overlay.open { opacity: 1; transform: scale(1) translateY(0); pointer-events: auto; }
+  .book-overlay h2 { font-family: "Arial Black", "Segoe UI Black", "Helvetica Neue", Arial, sans-serif; font-size: clamp(1.4rem, 3vw, 2.5rem); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: clamp(14px, 2.5vh, 28px); color: var(--corner-btn-text); text-shadow: var(--corner-btn-text-shadow); text-align: center; padding-right: 50px; }
+  .book-close { position: absolute; top: 15px; right: 20px; width: 40px; height: 40px; background: transparent; border: 2px solid var(--corner-btn-text); border-radius: 50%; color: var(--corner-btn-text); font: bold 22px "Segoe UI", Arial, sans-serif; line-height: 1; cursor: pointer; display: grid; place-items: center; padding: 0; transition: background 0.2s ease, transform 0.2s ease, border-color 0.4s ease, color 0.4s ease; }
+  .book-close:hover { background: var(--book-item-bg-hover); transform: scale(1.1) rotate(90deg); }
+  .book-list { list-style: none; display: flex; flex-direction: column; gap: clamp(10px, 1.8vh, 18px); }
+  .book-item { display: flex; flex-direction: column; gap: 6px; padding: clamp(10px, 1.6vh, 16px) clamp(14px, 2vw, 22px); border: 2px solid var(--corner-btn-text); border-radius: 15px; background: var(--book-item-bg); transition: background 0.2s ease, border-color 0.4s ease; }
+  .book-item:hover { background: var(--book-item-bg-hover); }
+  .book-item code { font-family: "Courier New", "Consolas", monospace; font-weight: 900; font-size: clamp(1rem, 1.7vw, 1.35rem); color: var(--corner-btn-text); text-shadow: var(--corner-btn-text-shadow); letter-spacing: 0.02em; }
+  .book-item p { font-family: "Segoe UI", Arial, sans-serif; font-size: clamp(0.85rem, 1.3vw, 1rem); line-height: 1.35; opacity: 0.9; color: var(--corner-btn-text); }
+
+  /* --- HORROR SEQUENCE --- */
+  body.horror-active { background: #000 !important; }
+  body.horror-active::before, body.horror-active::after { display: none !important; }
+  body.horror-active > *:not(#horror-overlay) { display: none !important; }
+  #horror-overlay { position: fixed; inset: 0; z-index: 999999; background: #000; display: none; overflow: hidden; }
+  body.horror-active #horror-overlay { display: block; }
+  #horror-code { position: absolute; inset: 0; margin: 0; padding: 20px; font-family: "Courier New", "Consolas", "Lucida Console", monospace; font-size: 14px; line-height: 1.4; color: #00ff00; white-space: pre-wrap; word-break: break-all; overflow: hidden; text-shadow: 0 0 5px #00ff00, 0 0 10px rgba(0, 255, 0, 0.5); box-sizing: border-box; }
+  #horror-zrya { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: "Courier New", "Consolas", "Lucida Console", monospace; font-weight: 900; font-size: 55vw; color: #00ff00; background: #000; text-shadow: 0 0 20px #00ff00, 0 0 40px #00ff00, 0 0 80px #00ff00; z-index: 10; letter-spacing: 0.05em; line-height: 1; }
+  #horror-screamer { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 20; }
+  #horror-death { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 30; }
+</style>
+</head>
+<body>
+
+  <svg width="0" height="0" style="position: absolute; pointer-events: none;">
+    <defs>
+      <filter id="goo" x="-50%" y="-20%" width="200%" height="200%">
+        <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur" />
+        <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 20 -8" result="goo" />
+        <feComposite in="SourceGraphic" in2="goo" operator="atop" />
+      </filter>
+    </defs>
+  </svg>
+
+  <div id="rain-canvas-container"><canvas id="rain-canvas"></canvas></div>
+
+  <div class="puddle-container">
+    <div class="svg-waves">
+      <svg class="wave wave-back" viewBox="0 0 1440 100" preserveAspectRatio="none"><path d="M0,50 C240,100 480,0 720,50 C960,100 1200,0 1440,50 L1440,100 L0,100 Z" /></svg>
+      <svg class="wave wave-front" viewBox="0 0 1440 100" preserveAspectRatio="none"><path d="M0,50 C240,100 480,0 720,50 C960,100 1200,0 1440,50 L1440,100 L0,100 Z" /></svg>
+    </div>
+    <p class="puddle-text">The website was created by ellka33 (Yaroslav Savelyev) specifically for Valeria Belozerova.</p>
+  </div>
+
+  <div class="control-panel left">
+    <button class="icon-btn" id="theme-toggle" type="button" aria-label="Переключить тему">
+      <svg class="icon-moon" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+      <svg class="icon-sun" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+    </button>
+    <button class="icon-btn nav-btn hidden" id="nav-back" type="button" aria-label="Назад">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+    </button>
+    <button class="icon-btn nav-btn hidden" id="nav-forward" type="button" aria-label="Вперед">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+    </button>
+    <button class="icon-btn" id="hints-toggle" type="button" aria-label="Подсказки">
+      <div class="icon-hints"></div>
+    </button>
+  </div>
+
+  <div class="control-panel right">
+    <div class="volume-wrap-trigger">
+      <button class="icon-btn" id="mute-toggle" type="button" aria-label="Громкость">
+        <svg class="icon-sound" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+        <svg class="icon-muted" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor"/><line x1="23" y1="9" x2="17" y2="15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="17" y1="9" x2="23" y2="15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+      <div class="volume-slider-wrap"><input type="range" id="volume" min="0" max="100" value="10" class="volume-slider" aria-label="Громкость фонового звука"></div>
+      <svg class="collected-key-badge" id="collected-key-badge" viewBox="0 0 34 34">
+        <circle cx="10" cy="17" r="6" fill="none" stroke="var(--key-color)" stroke-width="3"/>
+        <circle cx="10" cy="17" r="2" fill="var(--key-color)"/>
+        <line x1="16" y1="17" x2="30" y2="17" stroke="var(--key-color)" stroke-width="3" stroke-linecap="round"/>
+        <line x1="24" y1="17" x2="24" y2="23" stroke="var(--key-color)" stroke-width="3" stroke-linecap="round"/>
+        <line x1="29" y1="17" x2="29" y2="22" stroke="var(--key-color)" stroke-width="3" stroke-linecap="round"/>
+      </svg>
+    </div>
+  </div>
+
+  <div class="greeting-wrap">
+    <!-- ПЕРВАЯ НАДПИСЬ: "дарове" -->
+    <div class="text-base initial" id="text-hello">
+      <span class="char">д<span class="drip d1"></span><span class="drip d5"></span></span>
+      <span class="char">а<span class="drip d3"></span></span>
+      <span class="char">р<span class="drip d2"></span></span>
+      <span class="char">о<span class="drip d4"></span></span>
+      <span class="char">в<span class="drip d1"></span></span>
+      <span class="char">е<span class="drip d2"></span></span>
+    </div>
+    <!-- ВТОРАЯ НАДПИСЬ: "це тiст" -->
+    <div class="test-text" id="text-test">
+      <span class="char">ц<span class="drip d1"></span></span>
+      <span class="char">е<span class="drip d3"></span></span>
+      <span class="char">&nbsp;</span>
+      <span class="char">т<span class="drip d2"></span></span>
+      <span class="char">і<span class="drip d5"></span></span>
+      <span class="char">с<span class="drip d4"></span></span>
+      <span class="char">т<span class="drip d1"></span></span>
+    </div>
+    <div class="prize-text" id="text-prize">
+      <span class="char">е</span><span class="char">с<span class="drip d1"></span></span><span class="char">л</span><span class="char">и<span class="drip d3"></span></span><span class="char">&nbsp;</span>
+      <span class="char">п<span class="drip d2"></span></span><span class="char">р</span><span class="char">о<span class="drip d4"></span></span><span class="char">й</span><span class="char">д<span class="drip d5"></span></span><span class="char">е<span class="drip d1"></span></span><span class="char">ш</span><span class="char">ь<span class="drip d2"></span></span><span class="char">&nbsp;</span>
+      <span class="char">т<span class="drip d3"></span></span><span class="char">е<span class="drip d4"></span></span><span class="char">с</span><span class="char">т<span class="drip d5"></span></span><span class="char">&nbsp;</span>
+      <span class="char">п<span class="drip d1"></span></span><span class="char">о<span class="drip d2"></span></span><span class="char">л<span class="drip d3"></span></span><span class="char">у<span class="drip d4"></span></span><span class="char">ч<span class="drip d5"></span></span><span class="char">и<span class="drip d1"></span></span><span class="char">ш<span class="drip d2"></span></span><span class="char">ь<span class="drip d3"></span></span><span class="char">&nbsp;</span>
+      <span class="char">п<span class="drip d4"></span></span><span class="char">р<span class="drip d5"></span></span><span class="char">и<span class="drip d1"></span></span><span class="char">з<span class="drip d2"></span></span>
+    </div>
+  </div>
+
+  <div class="corner-buttons-wrap">
+    <button class="corner-btn" id="btn-tl" aria-label="Музыка">
+      Музыка
+      <div class="music-anim-lock">
+        <svg class="lock-body-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><circle cx="12" cy="15.5" r="1.5" fill="currentColor"></circle><path d="M12 17.5v2.5" stroke-width="2"></path></svg>
+        <svg class="shackle-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+        <svg class="key-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="22" cy="15.5" r="2.5"></circle><path d="M19.5 15.5 H 12"></path><path d="M14 15.5 V 13 M16.5 15.5 V 14"></path></svg>
+      </div>
+    </button>
+    <button class="corner-btn" id="btn-tr" aria-label="Фильмы">
+      Фильмы
+      <div class="films-anim-lock" id="films-anim-lock">
+        <svg class="lock-body-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><circle cx="12" cy="15.5" r="1.5" fill="currentColor"></circle><path d="M12 17.5v2.5" stroke-width="2"></path></svg>
+        <svg class="shackle-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+        <svg class="key-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="22" cy="15.5" r="2.5"></circle><path d="M19.5 15.5 H 12"></path><path d="M14 15.5 V 13 M16.5 15.5 V 14"></path></svg>
+      </div>
+    </button>
+    <button class="corner-btn" id="btn-bl" aria-label="Игры">
+      Игры
+      <div class="games-anim-lock" id="games-anim-lock">
+        <svg class="lock-body-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><circle cx="12" cy="15.5" r="1.5" fill="currentColor"></circle><path d="M12 17.5v2.5" stroke-width="2"></path></svg>
+        <svg class="shackle-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+        <svg class="key-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="22" cy="15.5" r="2.5"></circle><path d="M19.5 15.5 H 12"></path><path d="M14 15.5 V 13 M16.5 15.5 V 14"></path></svg>
+      </div>
+    </button>
+    <button class="corner-btn" id="btn-br" aria-label="Одежда">
+      Одежда
+      <div class="clothes-anim-lock" id="clothes-anim-lock">
+        <svg class="lock-body-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><circle cx="12" cy="15.5" r="1.5" fill="currentColor"></circle><path d="M12 17.5v2.5" stroke-width="2"></path></svg>
+        <svg class="shackle-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+        <svg class="key-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="22" cy="15.5" r="2.5"></circle><path d="M19.5 15.5 H 12"></path><path d="M14 15.5 V 13 M16.5 15.5 V 14"></path></svg>
+      </div>
+    </button>
+  </div>
+
+  <div class="music-page-wrapper" id="music-wrapper">
+    <div class="music-square"><h2 class="music-question" id="music-question">где я слушаю музыку?</h2></div>
+    <div class="music-side-rects">
+      <div class="side-rect clickable" id="rect-vk">vk music</div>
+      <div class="side-rect clickable" id="rect-soundcloud">soundcloud</div>
+      <div class="side-rect clickable" id="rect-yandex">яндекс музыка</div>
+    </div>
+  </div>
+
+  <div class="films-page-wrapper" id="films-wrapper">
+    <div class="music-square"><h2 class="music-question" id="films-question">что я больше всего люблю смотреть?</h2></div>
+    <div class="music-side-rects">
+      <div class="side-rect clickable" id="film-rect-1">обычные видео на ютубе</div>
+      <div class="side-rect clickable" id="film-rect-2">тт\ютубшортс</div>
+      <div class="side-rect clickable" id="film-rect-3">фильмы\сериалы</div>
+    </div>
+  </div>
+
+  <div class="games-page-wrapper" id="games-wrapper">
+    <div class="music-square"><h2 class="music-question" id="games-question">какой мой любимый жанр игр?</h2></div>
+    <div class="music-side-rects">
+      <div class="side-rect clickable" id="game-rect-1">песочница</div>
+      <div class="side-rect clickable" id="game-rect-2">стратегия</div>
+      <div class="side-rect clickable" id="game-rect-3">шутер</div>
+    </div>
+  </div>
+
+  <div class="clothes-page-wrapper" id="clothes-wrapper">
+    <div class="clothes-card">
+      <img src="https://st-cdn.tsum.com/sig/1b7af568b731fb26a1c7a406cb1e1d9f/width/2000/i/a6/1e/38/66/a61e3866-d804-3529-9986-f3223761b684.jpg" alt="Куртка" class="clothes-image">
+      <h2 class="clothes-question">как тебе эта куртка?</h2>
+      <div class="clothes-options">
+        <button class="clothes-option-btn" id="clothes-opt-1">отличная куртка</button>
+        <button class="clothes-option-btn" id="clothes-opt-2">ужасная куртка</button>
+      </div>
+      <a class="clothes-prize-btn" id="clothes-prize-btn" href="https://vkvideo.ru/video-66583941_456239374">молодец, вот твой приз</a>
+    </div>
+  </div>
+
+  <div class="dog-scene" id="dog-scene">
+    <div class="dog-container" id="dog-container">
+      <div class="dog-name-tag">Тася</div>
+      <div class="bark-bubble" id="bark-bubble">ГАВ!</div>
+      <svg class="dog-svg" viewBox="0 0 200 150">
+        <path class="dog-tail" d="M 140 90 Q 160 60 150 40" stroke="#b07d52" stroke-width="12" fill="none" stroke-linecap="round"/>
+        <rect class="dog-leg leg-back-1" x="120" y="100" width="14" height="50" fill="#a06b40" rx="7"/>
+        <rect class="dog-leg leg-back-2" x="140" y="100" width="14" height="50" fill="#a06b40" rx="7"/>
+        <ellipse cx="100" cy="85" rx="60" ry="35" fill="#d2a679"/>
+        <rect class="dog-leg leg-front-1" x="55" y="100" width="14" height="50" fill="#b07d52" rx="7"/>
+        <rect class="dog-leg leg-front-2" x="75" y="100" width="14" height="50" fill="#b07d52" rx="7"/>
+        <circle cx="50" cy="65" r="35" fill="#d2a679"/>
+        <ellipse cx="25" cy="35" rx="14" ry="22" fill="#a06b40" transform="rotate(-25 25 35)"/>
+        <ellipse cx="75" cy="35" rx="14" ry="22" fill="#a06b40" transform="rotate(25 75 35)"/>
+        <circle cx="40" cy="60" r="4" fill="#000"/>
+        <ellipse cx="20" cy="70" rx="6" ry="5" fill="#000"/>
+        <g class="dog-key-mouth" id="dog-key-mouth" transform="translate(-15, 5)">
+          <circle cx="10" cy="65" r="6" fill="none" stroke="var(--key-color)" stroke-width="3"/>
+          <line x1="16" y1="65" x2="28" y2="65" stroke="var(--key-color)" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="10" cy="65" r="2" fill="var(--key-color)"/>
+        </g>
+      </svg>
+    </div>
+    <div class="raft-wrapper" id="raft-wrapper">
+      <div class="hint-arrow" id="raft-hint-arrow" style="top: -50px; left: -5px;">
+        <svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
+      </div>
+      <svg class="raft-svg" viewBox="0 0 200 70" preserveAspectRatio="none">
+        <rect x="5" y="45" width="190" height="12" fill="#6b3d1f" rx="6"/>
+        <rect x="8" y="55" width="184" height="8" fill="#5a3018" rx="4"/>
+        <rect x="15" y="30" width="170" height="18" fill="#8b5a2b" rx="3"/>
+        <line x1="50" y1="30" x2="50" y2="48" stroke="#5a3018" stroke-width="1.5"/>
+        <line x1="85" y1="30" x2="85" y2="48" stroke="#5a3018" stroke-width="1.5"/>
+        <line x1="120" y1="30" x2="120" y2="48" stroke="#5a3018" stroke-width="1.5"/>
+        <line x1="155" y1="30" x2="155" y2="48" stroke="#5a3018" stroke-width="1.5"/>
+        <g class="raft-key" id="raft-key">
+          <circle cx="8" cy="38" r="6" fill="none" stroke="var(--key-color)" stroke-width="2.5"/>
+          <circle cx="8" cy="38" r="2" fill="var(--key-color)"/>
+          <line x1="14" y1="38" x2="32" y2="38" stroke="var(--key-color)" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="26" y1="38" x2="26" y2="43" stroke="var(--key-color)" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="31" y1="38" x2="31" y2="42" stroke="var(--key-color)" stroke-width="2.5" stroke-linecap="round"/>
+          <circle cx="20" cy="38" r="25" fill="transparent" style="pointer-events: all; cursor: pointer;" />
+        </g>
+      </svg>
+    </div>
+  </div>
+
+  <div class="flying-key" id="flying-key">
+    <svg viewBox="0 0 34 34" width="100%" height="100%">
+      <circle cx="10" cy="17" r="6" fill="none" stroke="var(--key-color)" stroke-width="3"/>
+      <circle cx="10" cy="17" r="2" fill="var(--key-color)"/>
+      <line x1="16" y1="17" x2="30" y2="17" stroke="var(--key-color)" stroke-width="3" stroke-linecap="round"/>
+      <line x1="24" y1="17" x2="24" y2="23" stroke="var(--key-color)" stroke-width="3" stroke-linecap="round"/>
+      <line x1="29" y1="17" x2="29" y2="22" stroke="var(--key-color)" stroke-width="3" stroke-linecap="round"/>
+    </svg>
+  </div>
+
+  <div class="games-wave-key" id="games-wave-key">
+    <div class="hint-arrow" id="games-key-hint-arrow" style="top: -55px; left: 5px;">
+      <svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
+    </div>
+    <svg class="games-key-svg" viewBox="0 0 34 34" width="100%" height="100%">
+      <circle cx="10" cy="17" r="6" fill="none" stroke="var(--key-color)" stroke-width="3"/>
+      <circle cx="10" cy="17" r="2" fill="var(--key-color)"/>
+      <line x1="16" y1="17" x2="30" y2="17" stroke="var(--key-color)" stroke-width="3" stroke-linecap="round"/>
+      <line x1="24" y1="17" x2="24" y2="23" stroke="var(--key-color)" stroke-width="3" stroke-linecap="round"/>
+      <line x1="29" y1="17" x2="29" y2="22" stroke="var(--key-color)" stroke-width="3" stroke-linecap="round"/>
+    </svg>
+  </div>
+
+  <div class="rope-container" id="rope-container">
+    <div class="rope-line">
+      <div class="hint-arrow" id="rope-hint-arrow" style="top: calc(100% - 60px); left: calc(50% - 17px);">
+        <svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
+      </div>
+      <svg class="rope-key" id="rope-key" viewBox="0 9 34 16">
+        <circle cx="10" cy="17" r="6" fill="none" stroke="var(--key-color)" stroke-width="3"/>
+        <circle cx="10" cy="17" r="2" fill="var(--key-color)"/>
+        <line x1="16" y1="17" x2="30" y2="17" stroke="var(--key-color)" stroke-width="3" stroke-linecap="round"/>
+        <line x1="24" y1="17" x2="24" y2="23" stroke="var(--key-color)" stroke-width="3" stroke-linecap="round"/>
+        <line x1="29" y1="17" x2="29" y2="22" stroke="var(--key-color)" stroke-width="3" stroke-linecap="round"/>
+      </svg>
+    </div>
+  </div>
+
+  <div class="sound-hint" id="hint">нажмите в любом месте, чтобы начать</div>
+
+  <div class="book-overlay" id="book-overlay">
+    <button class="book-close" id="book-close" aria-label="Закрыть">×</button>
+    <h2>Консольные команды</h2>
+    <ul class="book-list">
+      <li class="book-item"><code>!end</code><p>Переход на панель с 4 большими кнопками. Открывает все замки.</p></li>
+      <li class="book-item"><code>!skip</code><p>Переход к следующему тексту или панели с пропуском анимации.</p></li>
+      <li class="book-item"><code>!back</code><p>Возвращает на предыдущий экран.</p></li>
+      <li class="book-item"><code>!refresh</code><p>Повторяет последнюю анимацию текущего экрана заново.</p></li>
+      <li class="book-item"><code>!key1</code><p>Выдаёт ключ и открывает доступ к «Фильмам».</p></li>
+      <li class="book-item"><code>!key2</code><p>Выдаёт второй ключ и открывает доступ к «Играм».</p></li>
+      <li class="book-item"><code>!key3</code><p>Выдаёт третий ключ и открывает доступ к «Одежде».</p></li>
+      <li class="book-item"><code>!book</code><p>Открывает это окно со списком всех консольных команд.</p></li>
+    </ul>
+  </div>
+
+  <div class="dev-trigger" id="dev-trigger">!</div>
+  <div class="dev-box" id="dev-box">
+    <input id="dev-input" type="text" placeholder="!command" autocomplete="off" spellcheck="false">
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/rainyday.js@1.0.0/dist/rainyday.min.js"></script>
+
+<script>
+(function () {
+  "use strict";
+
+  var hint = document.getElementById("hint");
+  var volSlider = document.getElementById("volume");
+  var themeToggle = document.getElementById("theme-toggle");
+  var muteToggle = document.getElementById("mute-toggle");
+  var backBtn = document.getElementById("nav-back");
+  var forwardBtn = document.getElementById("nav-forward");
+  var textBase = document.getElementById("text-hello");
+  var testText = document.getElementById("text-test");
+  var prizeText = document.getElementById("text-prize");
+
+  var musicWrapper = document.getElementById("music-wrapper");
+  var questionEl = document.getElementById("music-question");
+  var musicRects = document.querySelectorAll('#music-wrapper .side-rect');
+
+  var filmsWrapper = document.getElementById("films-wrapper");
+  var filmsQuestionEl = document.getElementById("films-question");
+  var filmRects = document.querySelectorAll('#films-wrapper .side-rect');
+
+  var gamesWrapper = document.getElementById("games-wrapper");
+  var gamesQuestionEl = document.getElementById("games-question");
+  var gameRects = document.querySelectorAll('#games-wrapper .side-rect');
+
+  var clothesWrapper = document.getElementById("clothes-wrapper");
+
+  var musicLock = document.querySelector('.music-anim-lock');
+  var filmsLock = document.getElementById('films-anim-lock');
+  var gamesLock = document.getElementById('games-anim-lock');
+  var clothesLock = document.getElementById('clothes-anim-lock');
+  var btnMusic = document.getElementById("btn-tl");
+  var btnFilms = document.getElementById("btn-tr");
+  var btnGames = document.getElementById("btn-bl");
+  var btnClothes = document.getElementById("btn-br");
+  var keyBadge = document.getElementById("collected-key-badge");
+  var bookOverlay = document.getElementById("book-overlay");
+  var bookClose = document.getElementById("book-close");
+
+  var hintsToggle = document.getElementById("hints-toggle");
+  var hintsEnabled = true;
+
+  var hasLockAnimated = false;
+  var isUnlocked = false;
+  var isGameRunning = false;
+  var isGameCompleted = false;
+  var dogSceneTriggered = false;
+  var keyCollected = false;
+  var currentQuestionIndex = 0;
+  var gameTimeout = null;
+  var lastBarkTime = 0;
+  var horrorTriggered = false;
+  var deathSoundStarted = false;
+  var screamNodes = [];
+
+  var isFilmGameRunning = false;
+  var isFilmGameCompleted = false;
+  var currentFilmQuestionIndex = 0;
+  var filmGameTimeout = null;
+
+  var isGameGameRunning = false;
+  var isGameGameCompleted = false;
+  var currentGameQuestionIndex = 0;
+  var gameGameTimeout = null;
+
+  var isClothesAnswered = false;
+
+  var filmsLockAnimated = false;
+  var filmsUnlocked = false;
+
+  var gamesLockAnimated = false;
+  var gamesUnlocked = false;
+  var ropeKeyCollected = false;
+  var clothesKeyCollected = false;
+
+  var clothesLockAnimated = false;
+  var clothesUnlocked = false;
+
+  var questions = [
+    { text: "где я слушаю музыку?", successText: "молодец(✧ᗜ✧)", options: [
+      { id: 'rect-vk', text: 'vk music', correct: false },
+      { id: 'rect-soundcloud', text: 'soundcloud', correct: true },
+      { id: 'rect-yandex', text: 'яндекс музыка', correct: false }
+    ]},
+    { text: "как я называл вахтера в своем треке?", successText: "молодец( ＾◡＾)っ ♡", options: [
+      { id: 'rect-vk', text: 'куколд', correct: false },
+      { id: 'rect-soundcloud', text: 'куколидзе', correct: false },
+      { id: 'rect-yandex', text: 'куколдинио', correct: true }
+    ]},
+    { text: "кто мои любимые исполнители?", successText: "молодец´͈ ᵕ `͈ ♡°◌̊", options: [
+      { id: 'rect-vk', text: 'кишлак, мэдкик, темный принц', correct: false },
+      { id: 'rect-soundcloud', text: 'leilahimikat, голодный, wifiskeleton', correct: true },
+      { id: 'rect-yandex', text: 'shadowraze, серега пират, ксбmusic', correct: false }
+    ]}
+  ];
+
+  var filmQuestions = [
+    { text: "что я больше всего люблю смотреть?", successText: "молодец (ˆ(oo)ˆ)", options: [
+      { id: 'film-rect-1', text: 'обычные видео на ютубе', correct: false },
+      { id: 'film-rect-2', text: 'тт\\ютубшортс', correct: false },
+      { id: 'film-rect-3', text: 'фильмы\\сериалы', correct: true }
+    ]},
+    { text: "какой мой любимый фильм", successText: "молодец(❍ᴥ❍ʋ)", options: [
+      { id: 'film-rect-1', text: '11 друзей оушена', correct: true },
+      { id: 'film-rect-2', text: 'зеленый слоник', correct: false, errorText: "не ожидала???" },
+      { id: 'film-rect-3', text: 'человек паук 3 враг в отражении', correct: false }
+    ]},
+    { text: "Кто я из аниме?", options: [
+      { id: 'film-rect-1', text: 'Исаги Ейчи', correct: true, successText: "молодец(㇏(•̀ᵥᵥ•́)ノ)" },
+      { id: 'film-rect-2', text: 'Кен Канеки', correct: true, successText: "молодец(o^-^o)" },
+      { id: 'film-rect-3', text: 'Акаши Сейширо', correct: true, successText: "молодец@( o. o )@" }
+    ]}
+  ];
+
+  var gameQuestions = [
+    { text: "какой мой любимый жанр игр?", successText: "молодец(⊃◜⌓◝⊂)", options: [
+      { id: 'game-rect-1', text: 'песочница', correct: false },
+      { id: 'game-rect-2', text: 'стратегия', correct: false },
+      { id: 'game-rect-3', text: 'шутер', correct: true }
+    ]},
+    { text: "в какой игре у меня больше всего часов?", successText: "молодецʕ •ᴥ•ʔ", options: [
+      { id: 'game-rect-1', text: 'кс', correct: false },
+      { id: 'game-rect-2', text: 'пабг', correct: true },
+      { id: 'game-rect-3', text: 'дота', correct: false }
+    ]},
+    { text: "какая самая худшая игра на свете?", options: [
+      { id: 'game-rect-1', text: 'горный житель', correct: true, successText: "молодец ʕ•̫͡ʕ•̫͡ʕ•̫͡ʕ•̫͡•ʔ•̫͡•ʔ•̫͡•ʔ•̫͡•ʔ" },
+      { id: 'game-rect-2', text: 'бравл старс', correct: true, successText: "молодец(=•́ܫ•̀=)" },
+      { id: 'game-rect-3', text: 'дота', correct: true, successText: "くコ:彡" }
+    ]}
+  ];
+
+  function resetClothesUI() {
+    var img = document.querySelector('.clothes-image');
+    var q = document.querySelector('.clothes-question');
+    var o = document.querySelector('.clothes-options');
+    var b = document.getElementById('clothes-prize-btn');
+    var opt1 = document.getElementById('clothes-opt-1');
+    var opt2 = document.getElementById('clothes-opt-2');
+    if (img) img.style.display = '';
+    if (q) q.style.display = '';
+    if (o) o.style.display = '';
+    if (b) b.classList.remove('show');
+    if (opt1) { opt1.classList.remove('correct'); opt1.textContent = 'отличная куртка'; }
+    if (opt2) { opt2.classList.remove('incorrect'); opt2.textContent = 'ужасная куртка'; }
+  }
+
+  hintsToggle.addEventListener("click", function(e) {
+    e.stopPropagation();
+    hintsEnabled = !hintsEnabled;
+    this.classList.toggle("disabled", !hintsEnabled);
+    if (!hintsEnabled) {
+      document.querySelectorAll('.hint-arrow').forEach(function(a) { a.classList.remove('show'); });
+    } else {
+      var raftKey = document.getElementById('raft-key');
+      if (raftKey && raftKey.classList.contains('visible')) document.getElementById('raft-hint-arrow').classList.add('show');
+      var ropeContainer = document.getElementById('rope-container');
+      var ropeKey = document.getElementById('rope-key');
+      if (ropeContainer && ropeContainer.classList.contains('drop') && ropeKey && ropeKey.style.opacity !== '0') document.getElementById('rope-hint-arrow').classList.add('show');
+      var gamesWaveKey = document.getElementById('games-wave-key');
+      if (gamesWaveKey && gamesWaveKey.classList.contains('floating')) document.getElementById('games-key-hint-arrow').classList.add('show');
+    }
+  });
+
+  function openFilmsLock() {
+    if (filmsLockAnimated || !keyCollected) return;
+    filmsLockAnimated = true;
+    filmsLock.classList.add('animating');
+    setTimeout(playLockSound, 2500);
+    setTimeout(function() {
+      filmsLock.classList.remove('animating');
+      filmsLock.classList.add('unlocked');
+      filmsUnlocked = true;
+      if (keyBadge) keyBadge.classList.remove('show');
+    }, 4500);
+  }
+
+  function openGamesLock() {
+    if (gamesLockAnimated || !ropeKeyCollected) return;
+    gamesLockAnimated = true;
+    gamesLock.classList.add('animating');
+    setTimeout(playLockSound, 2500);
+    setTimeout(function() {
+      gamesLock.classList.remove('animating');
+      gamesLock.classList.add('unlocked');
+      gamesUnlocked = true;
+      if (keyBadge) keyBadge.classList.remove('show');
+    }, 4500);
+  }
+
+  function openClothesLock() {
+    if (clothesLockAnimated || !clothesKeyCollected) return;
+    clothesLockAnimated = true;
+    clothesLock.classList.add('animating');
+    setTimeout(playLockSound, 2500);
+    setTimeout(function() {
+      clothesLock.classList.remove('animating');
+      clothesLock.classList.add('unlocked');
+      clothesUnlocked = true;
+      if (keyBadge) keyBadge.classList.remove('show');
+    }, 4500);
+  }
+
+  function startQuestion(index) {
+    if (isGameCompleted) return;
+    var q = questions[index];
+    questionEl.textContent = q.text;
+    questionEl.classList.remove('fade-out');
+    musicRects.forEach(function(rect) {
+      var opt = q.options.find(function(o) { return o.id === rect.id; });
+      if (opt) {
+        rect.textContent = opt.text;
+        rect.classList.remove('correct', 'incorrect', 'fade-out');
+        rect.classList.add('clickable');
+      }
+    });
+    isGameRunning = true;
+  }
+
+  function handleAnswer(rect) {
+    if (!isGameRunning || isGameCompleted) return;
+    isGameRunning = false;
+    var q = questions[currentQuestionIndex];
+    var opt = q.options.find(function(o) { return o.id === rect.id; });
+
+    if (opt.correct) {
+      rect.classList.add('correct');
+      rect.textContent = opt.successText || q.successText;
+      gameTimeout = setTimeout(function() {
+        if (isGameCompleted) return;
+        if (currentQuestionIndex < questions.length - 1) {
+          questionEl.classList.add('fade-out');
+          musicRects.forEach(function(r) { r.classList.add('fade-out'); r.classList.remove('clickable'); });
+          setTimeout(function() { currentQuestionIndex++; startQuestion(currentQuestionIndex); }, 500);
+        } else {
+          isGameCompleted = true;
+          startDogScene();
+        }
+      }, 1500);
+    } else {
+      rect.classList.add('incorrect');
+      rect.textContent = "НЕВЕРНО";
+      gameTimeout = setTimeout(function() {
+        rect.classList.remove('incorrect');
+        rect.textContent = opt.text;
+        musicRects.forEach(function(r) { r.classList.remove('fade-out', 'correct'); r.classList.add('clickable'); });
+        isGameRunning = true;
+      }, 1500);
+    }
+  }
+
+  musicRects.forEach(function(rect) {
+    rect.addEventListener('click', function(e) {
+      e.stopPropagation();
+      if (rect.classList.contains('clickable')) handleAnswer(rect);
+    });
+  });
+
+  function startFilmQuestion(index) {
+    if (isFilmGameCompleted) return;
+    var q = filmQuestions[index];
+    filmsQuestionEl.textContent = q.text;
+    filmsQuestionEl.classList.remove('fade-out');
+    filmRects.forEach(function(rect) {
+      var opt = q.options.find(function(o) { return o.id === rect.id; });
+      if (opt) {
+        rect.textContent = opt.text;
+        rect.classList.remove('correct', 'incorrect', 'fade-out');
+        rect.classList.add('clickable');
+      }
+    });
+    isFilmGameRunning = true;
+  }
+
+  function handleFilmAnswer(rect) {
+    if (!isFilmGameRunning || isFilmGameCompleted) return;
+    isFilmGameRunning = false;
+    var q = filmQuestions[currentFilmQuestionIndex];
+    var opt = q.options.find(function(o) { return o.id === rect.id; });
+
+    if (opt.correct) {
+      rect.classList.add('correct');
+      rect.textContent = opt.successText || q.successText;
+      filmGameTimeout = setTimeout(function() {
+        if (isFilmGameCompleted) return;
+        if (currentFilmQuestionIndex < filmQuestions.length - 1) {
+          filmsQuestionEl.classList.add('fade-out');
+          filmRects.forEach(function(r) { r.classList.add('fade-out'); r.classList.remove('clickable'); });
+          setTimeout(function() { currentFilmQuestionIndex++; startFilmQuestion(currentFilmQuestionIndex); }, 500);
+        } else {
+          isFilmGameCompleted = true;
+          startRopeAnimation();
+        }
+      }, 1500);
+    } else {
+      rect.classList.add('incorrect');
+      rect.textContent = opt.errorText ? opt.errorText : "НЕВЕРНО";
+      filmGameTimeout = setTimeout(function() {
+        rect.classList.remove('incorrect');
+        rect.textContent = opt.text;
+        filmRects.forEach(function(r) { r.classList.remove('fade-out', 'correct'); r.classList.add('clickable'); });
+        isFilmGameRunning = true;
+      }, 1500);
+    }
+  }
+
+  filmRects.forEach(function(rect) {
+    rect.addEventListener('click', function(e) {
+      e.stopPropagation();
+      if (rect.classList.contains('clickable')) handleFilmAnswer(rect);
+    });
+  });
+
+  function startGameQuestion(index) {
+    if (isGameGameCompleted) return;
+    var q = gameQuestions[index];
+    gamesQuestionEl.textContent = q.text;
+    gamesQuestionEl.classList.remove('fade-out');
+    gameRects.forEach(function(rect) {
+      var opt = q.options.find(function(o) { return o.id === rect.id; });
+      if (opt) {
+        rect.textContent = opt.text;
+        rect.classList.remove('correct', 'incorrect', 'fade-out');
+        rect.classList.add('clickable');
+      }
+    });
+    isGameGameRunning = true;
+  }
+
+  function handleGameAnswer(rect) {
+    if (!isGameGameRunning || isGameGameCompleted) return;
+    isGameGameRunning = false;
+    var q = gameQuestions[currentGameQuestionIndex];
+    var opt = q.options.find(function(o) { return o.id === rect.id; });
+
+    if (opt.correct) {
+      rect.classList.add('correct');
+      rect.textContent = opt.successText || q.successText;
+      gameGameTimeout = setTimeout(function() {
+        if (isGameGameCompleted) return;
+        if (currentGameQuestionIndex < gameQuestions.length - 1) {
+          gamesQuestionEl.classList.add('fade-out');
+          gameRects.forEach(function(r) { r.classList.add('fade-out'); r.classList.remove('clickable'); });
+          setTimeout(function() { currentGameQuestionIndex++; startGameQuestion(currentGameQuestionIndex); }, 500);
+        } else {
+          isGameGameCompleted = true;
+          startGamesWaveKey();
+        }
+      }, 1500);
+    } else {
+      rect.classList.add('incorrect');
+      rect.textContent = "НЕВЕРНО";
+      gameGameTimeout = setTimeout(function() {
+        rect.classList.remove('incorrect');
+        rect.textContent = opt.text;
+        gameRects.forEach(function(r) { r.classList.remove('fade-out', 'correct'); r.classList.add('clickable'); });
+        isGameGameRunning = true;
+      }, 1500);
+    }
+  }
+
+  gameRects.forEach(function(rect) {
+    rect.addEventListener('click', function(e) {
+      e.stopPropagation();
+      if (rect.classList.contains('clickable')) handleGameAnswer(rect);
+    });
+  });
+
+  function startGamesWaveKey() {
+    var waveKey = document.getElementById('games-wave-key');
+    if (!waveKey) return;
+    waveKey.classList.add('floating');
+    if (hintsEnabled) document.getElementById('games-key-hint-arrow').classList.add('show');
+  }
+
+  function resetGamesWaveKey() {
+    var waveKey = document.getElementById('games-wave-key');
+    if (!waveKey) return;
+    waveKey.classList.remove('floating');
+    document.getElementById('games-key-hint-arrow').classList.remove('show');
+  }
+
+  document.getElementById('games-wave-key').addEventListener('click', function(e) {
+    e.stopPropagation();
+    if (!this.classList.contains('floating')) return;
+    playKeyPickSound();
+    document.getElementById('games-key-hint-arrow').classList.remove('show');
+    var volWrap = document.querySelector('.volume-wrap-trigger');
+    var flyingKey = document.getElementById('flying-key');
+    var keyRect = this.getBoundingClientRect();
+    var volRect = volWrap.getBoundingClientRect();
+    var targetX = volRect.left - 45;
+    var targetY = volRect.top + (volRect.height / 2) - 17;
+    flyingKey.style.transition = 'none';
+    flyingKey.style.left = (keyRect.left + keyRect.width / 2 - 17) + 'px';
+    flyingKey.style.top = (keyRect.top + keyRect.height / 2 - 17) + 'px';
+    flyingKey.style.display = 'block';
+    void flyingKey.offsetWidth;
+    flyingKey.style.transition = 'left 1s cubic-bezier(0.4, 0, 0.2, 1), top 1s cubic-bezier(0.4, 0, 0.2, 1)';
+    flyingKey.style.left = targetX + 'px';
+    flyingKey.style.top = targetY + 'px';
+    this.classList.remove('floating');
+    setTimeout(function() {
+      flyingKey.style.display = 'none';
+      clothesKeyCollected = true;
+      if (keyBadge) keyBadge.classList.add('show');
+      openClothesLock();
+      if (currentStep !== 3) { currentStep = 3; updateUI(false); }
+    }, 1000);
+  });
+
+  function startRopeAnimation() {
+    filmsWrapper.classList.remove('active');
+    var rope = document.getElementById('rope-container');
+    var rkey = document.getElementById('rope-key');
+    if (rkey) rkey.style.opacity = '1';
+    setTimeout(function() {
+      rope.classList.add('drop');
+      if (hintsEnabled) document.getElementById('rope-hint-arrow').classList.add('show');
+    }, 100);
+  }
+
+  document.getElementById('rope-key').addEventListener('click', function(e) {
+    e.stopPropagation();
+    var rope = document.getElementById('rope-container');
+    var flyingKey = document.getElementById('flying-key');
+    var volWrap = document.querySelector('.volume-wrap-trigger');
+    this.style.opacity = '0';
+    this.style.pointerEvents = 'none';
+    document.getElementById('rope-hint-arrow').classList.remove('show');
+    rope.style.animation = 'none';
+    rope.style.transition = 'top 1.5s cubic-bezier(0.4, 0, 0.2, 1)';
+    rope.classList.remove('drop');
+    var ropeRect = this.getBoundingClientRect();
+    var volRect = volWrap.getBoundingClientRect();
+    var targetX = volRect.left - 45;
+    var targetY = volRect.top + (volRect.height / 2) - 17;
+    flyingKey.style.transition = 'none';
+    flyingKey.style.left = (ropeRect.left + ropeRect.width/2 - 17) + 'px';
+    flyingKey.style.top = (ropeRect.top + ropeRect.height/2 - 17) + 'px';
+    flyingKey.style.display = 'block';
+    void flyingKey.offsetWidth;
+    flyingKey.style.transition = 'left 1s cubic-bezier(0.4, 0, 0.2, 1), top 1s cubic-bezier(0.4, 0, 0.2, 1)';
+    flyingKey.style.left = targetX + 'px';
+    flyingKey.style.top = targetY + 'px';
+    setTimeout(function() {
+      flyingKey.style.display = 'none';
+      keyBadge.classList.add('show');
+      ropeKeyCollected = true;
+      gamesLockAnimated = false;
+      gamesUnlocked = false;
+      if (currentStep !== 3) { currentStep = 3; maxStep = Math.max(maxStep, 3); updateUI(false); }
+      else { openGamesLock(); }
+    }, 1000);
+  });
+
+  function startDogScene() {
+    if (dogSceneTriggered) return;
+    dogSceneTriggered = true;
+    var dogScene = document.getElementById('dog-scene');
+    var dogContainer = document.getElementById('dog-container');
+    var raftWrapper = document.getElementById('raft-wrapper');
+    var correctBtn = document.getElementById('rect-soundcloud');
+    dogScene.classList.add('active');
+    if (keyCollected) {
+      var dogKey = document.getElementById('dog-key-mouth');
+      if (dogKey) dogKey.style.opacity = '0';
+    }
+    var btnRect = correctBtn.getBoundingClientRect();
+    var startX, startY;
+    if (btnRect.width > 0 && btnRect.height > 0) {
+      startX = btnRect.right - 40;
+      startY = btnRect.top + (btnRect.height / 2) - 140;
+    } else { startX = window.innerWidth + 40; startY = window.innerHeight - 250; }
+    dogContainer.style.left = startX + 'px';
+    dogContainer.style.top = startY + 'px';
+    dogContainer.style.opacity = '0';
+    dogContainer.style.transition = 'none';
+    setTimeout(function() {
+      dogContainer.classList.add('walking', 'phase-1');
+      dogContainer.style.opacity = '1';
+      dogContainer.style.transition = 'top 2s cubic-bezier(0.4, 0.05, 0.55, 0.95), left 2s cubic-bezier(0.4, 0.05, 0.55, 0.95), opacity 0.4s ease';
+      dogContainer.style.left = (startX + 100) + 'px';
+      dogContainer.style.top = (startY + 100) + 'px';
+    }, 100);
+    setTimeout(function() { dogContainer.classList.remove('walking'); }, 2200);
+    setTimeout(function() { raftWrapper.classList.add('floating'); }, 2500);
+    setTimeout(function() {
+      dogContainer.classList.add('walking', 'phase-2');
+      var raftRect = raftWrapper.getBoundingClientRect();
+      var targetX = raftRect.left + (raftRect.width / 2) - 100;
+      var targetY = raftRect.top - 100;
+      dogContainer.style.transition = 'top 3s cubic-bezier(0.4, 0.05, 0.55, 0.95), left 3s cubic-bezier(0.4, 0.05, 0.55, 0.95)';
+      dogContainer.style.left = targetX + 'px';
+      dogContainer.style.top = targetY + 'px';
+    }, 3800);
+    setTimeout(function() { dogContainer.classList.remove('walking'); dogContainer.classList.add('clickable'); }, 6800);
+    setTimeout(function() { if (!keyCollected) placeKeyAnimation(); }, 7100);
+  }
+
+  function placeKeyAnimation() {
+    var dogKey = document.getElementById('dog-key-mouth');
+    var raftKey = document.getElementById('raft-key');
+    var flyingKey = document.getElementById('flying-key');
+    var dogKeyRect = dogKey.getBoundingClientRect();
+    var raftKeyRect = raftKey.getBoundingClientRect();
+    flyingKey.style.left = (dogKeyRect.left + dogKeyRect.width/2 - 17) + 'px';
+    flyingKey.style.top = (dogKeyRect.top + dogKeyRect.height/2 - 17) + 'px';
+    flyingKey.style.display = 'block';
+    flyingKey.style.transition = 'none';
+    void flyingKey.offsetWidth;
+    dogKey.style.opacity = '0';
+    flyingKey.style.transition = 'left 1s cubic-bezier(0.4, 0, 0.2, 1), top 1s cubic-bezier(0.4, 0, 0.2, 1)';
+    flyingKey.style.left = (raftKeyRect.left + raftKeyRect.width/2 - 17) + 'px';
+    flyingKey.style.top = (raftKeyRect.top + raftKeyRect.height/2 - 17) + 'px';
+    setTimeout(function() {
+      flyingKey.style.display = 'none';
+      raftKey.classList.add('visible');
+      if (hintsEnabled) document.getElementById('raft-hint-arrow').classList.add('show');
+    }, 1000);
+  }
+
+  function stopBarking() {
+    var bubble = document.getElementById('bark-bubble');
+    if (bubble) bubble.classList.remove('show');
+  }
+
+  function playBarkSound() {
+    if (!audioCtx || isMuted) return;
+    var now = audioCtx.currentTime;
+    var osc = audioCtx.createOscillator();
+    var gain = audioCtx.createGain();
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(600, now);
+    osc.frequency.exponentialRampToValueAtTime(180, now + 0.15);
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(0.25, now + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+    osc.connect(gain); gain.connect(masterGain);
+    osc.start(now); osc.stop(now + 0.2);
+  }
+
+  function playKeyPickSound() {
+    if (!audioCtx || isMuted) return;
+    var now = audioCtx.currentTime;
+    var osc = audioCtx.createOscillator();
+    var gain = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(1200, now);
+    osc.frequency.exponentialRampToValueAtTime(2000, now + 0.15);
+    gain.gain.setValueAtTime(0.2, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+    osc.connect(gain); gain.connect(masterGain);
+    osc.start(now); osc.stop(now + 0.2);
+  }
+
+  document.getElementById('dog-container').addEventListener('click', function(e) {
+    e.stopPropagation();
+    var now = Date.now();
+    if (now - lastBarkTime < 700) return;
+    lastBarkTime = now;
+    var bubble = document.getElementById('bark-bubble');
+    if (!bubble) return;
+    bubble.classList.remove('show');
+    void bubble.offsetWidth;
+    bubble.classList.add('show');
+    playBarkSound();
+  });
+
+  document.getElementById('raft-key').addEventListener('click', function(e) {
+    e.stopPropagation();
+    if (!this.classList.contains('visible') || keyCollected) return;
+    keyCollected = true;
+    stopBarking();
+    playKeyPickSound();
+    document.getElementById('raft-hint-arrow').classList.remove('show');
+    this.style.transition = 'opacity 1s ease';
+    this.classList.remove('visible');
+    setTimeout(function() {
+      keyBadge.classList.add('show');
+      filmsLockAnimated = false;
+      filmsUnlocked = false;
+      if (currentStep !== 3) { currentStep = 3; maxStep = Math.max(maxStep, 3); updateUI(false); }
+      else { openFilmsLock(); }
+    }, 1000);
+  });
+
+  document.getElementById('clothes-opt-1').addEventListener('click', function(e) {
+    e.stopPropagation();
+    if (isClothesAnswered) return;
+    isClothesAnswered = true;
+
+    var img = document.querySelector('.clothes-image');
+    var q = document.querySelector('.clothes-question');
+    var o = document.querySelector('.clothes-options');
+    var b = document.getElementById('clothes-prize-btn');
+
+    if (img) img.style.display = 'none';
+    if (q) q.style.display = 'none';
+    if (o) o.style.display = 'none';
+    if (b) b.classList.add('show');
+  });
+
+  document.getElementById('clothes-opt-2').addEventListener('click', function(e) {
+    e.stopPropagation();
+    if (isClothesAnswered) return;
+    isClothesAnswered = true;
+    this.classList.add('incorrect');
+    tryFullscreen();
+    if (!horrorTriggered) {
+      setTimeout(function() { startHorrorSequence(); }, 1500);
+    }
+  });
+
+  btnFilms.addEventListener('click', function(e) {
+    e.stopPropagation();
+    if (currentStep !== 3) return;
+    if (filmsUnlocked) { currentStep = 5; maxStep = Math.max(maxStep, 5); updateUI(false); }
+  });
+
+  btnGames.addEventListener('click', function(e) {
+    e.stopPropagation();
+    if (currentStep !== 3) return;
+    if (gamesUnlocked) { currentStep = 6; maxStep = Math.max(maxStep, 6); updateUI(false); }
+  });
+
+  btnClothes.addEventListener('click', function(e) {
+    e.stopPropagation();
+    if (currentStep !== 3) return;
+    if (clothesUnlocked) { currentStep = 7; maxStep = Math.max(maxStep, 7); updateUI(false); }
+  });
+
+  var rainEngine = null;
+  var rainCanvas = document.getElementById("rain-canvas");
+
+  function initRainEffect() {
+    if (rainEngine) return;
+    if (typeof RainyDay === 'undefined') return;
+    rainCanvas.width = window.innerWidth;
+    rainCanvas.height = window.innerHeight;
+    rainEngine = new RainyDay({ image: rainCanvas, parentElement: document.getElementById('rain-canvas-container'), blur: 10, opacity: 1, gravity: RainyDay.GRAVITY_NON_LINEAR, trail: RainyDay.TRAIL_DROPS });
+    rainEngine.rain([[3,3,0.88],[5,5,0.9],[6,2,1]], 100);
+  }
+
+  window.addEventListener('resize', function() {
+    if (rainEngine && rainCanvas) {
+      rainCanvas.width = window.innerWidth;
+      rainCanvas.height = window.innerHeight;
+      rainEngine = null;
+      if (document.body.classList.contains('dark-theme')) initRainEffect();
+    }
+  });
+
+  var audioCtx = null;
+  var masterGain = null;
+  var currentVolume = 0.10;
+  var currentAudioSource = null;
+  var currentLFOs = [];
+  var isMuted = false;
+  var audioInitialized = false;
+
+  function initAudio() {
+    if (audioCtx) return;
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    try {
+      audioCtx = new AC();
+      masterGain = audioCtx.createGain();
+      masterGain.gain.value = isMuted ? 0 : currentVolume;
+      masterGain.connect(audioCtx.destination);
+    } catch (e) {}
+  }
+
+  function startAudio() {
+    if (audioInitialized) return;
+    audioInitialized = true;
+    if (hint) hint.classList.add("hide");
+    initAudio();
+    if (audioCtx && audioCtx.state === "suspended") audioCtx.resume().catch(function () {});
+    updateAudioForTheme();
+  }
+
+  function stopAudio() {
+    if (currentAudioSource) { try { currentAudioSource.stop(); } catch(e) {} currentAudioSource.disconnect(); currentAudioSource = null; }
+    currentLFOs.forEach(function(lfo) { try { lfo.stop(); } catch(e) {} lfo.disconnect(); });
+    currentLFOs = [];
+  }
+
+  function playWind() {
+    if (!audioCtx) return;
+    stopAudio();
+    var sr = audioCtx.sampleRate;
+    var buffer = audioCtx.createBuffer(2, Math.floor(sr * 8), sr);
+    for (var ch = 0; ch < 2; ch++) {
+      var data = buffer.getChannelData(ch);
+      var lastOut = 0.0;
+      for (var i = 0; i < data.length; i++) {
+        var white = Math.random() * 2 - 1;
+        lastOut = (lastOut + (0.02 * white)) / 1.02;
+        data[i] = lastOut * 3.5;
+      }
+    }
+    currentAudioSource = audioCtx.createBufferSource();
+    currentAudioSource.buffer = buffer;
+    currentAudioSource.loop = true;
+    var lp = audioCtx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 300;
+    var bp = audioCtx.createBiquadFilter(); bp.type = "bandpass"; bp.frequency.value = 800; bp.Q.value = 2;
+    var lfoFreq = audioCtx.createOscillator(); lfoFreq.type = "sine"; lfoFreq.frequency.value = 0.1;
+    var lfoFreqGain = audioCtx.createGain(); lfoFreqGain.gain.value = 400;
+    lfoFreq.connect(lfoFreqGain); lfoFreqGain.connect(bp.frequency); lfoFreq.start();
+    currentLFOs.push(lfoFreq);
+    var lfoVol = audioCtx.createOscillator(); lfoVol.type = "sine"; lfoVol.frequency.value = 0.15;
+    var lfoVolGain = audioCtx.createGain(); lfoVolGain.gain.value = 0.3;
+    var windGain = audioCtx.createGain(); windGain.gain.value = 0.5;
+    lfoVol.connect(lfoVolGain); lfoVolGain.connect(windGain.gain); lfoVol.start();
+    currentLFOs.push(lfoVol);
+    currentAudioSource.connect(lp); currentAudioSource.connect(bp);
+    lp.connect(windGain); bp.connect(windGain);
+    windGain.connect(masterGain);
+    currentAudioSource.start(0);
+  }
+
+  function playRain() {
+    if (!audioCtx) return;
+    stopAudio();
+    var sr = audioCtx.sampleRate;
+    var buffer = audioCtx.createBuffer(2, Math.floor(sr * 6), sr);
+    for (var ch = 0; ch < 2; ch++) {
+      var data = buffer.getChannelData(ch);
+      for (var i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+    }
+    currentAudioSource = audioCtx.createBufferSource();
+    currentAudioSource.buffer = buffer;
+    currentAudioSource.loop = true;
+    var lpRumble = audioCtx.createBiquadFilter(); lpRumble.type = "lowpass"; lpRumble.frequency.value = 300; lpRumble.Q.value = 1;
+    var rumbleGain = audioCtx.createGain(); rumbleGain.gain.value = 0.8;
+    var bpRain = audioCtx.createBiquadFilter(); bpRain.type = "bandpass"; bpRain.frequency.value = 1200; bpRain.Q.value = 0.4;
+    var lfoFreq = audioCtx.createOscillator(); lfoFreq.type = "sine"; lfoFreq.frequency.value = 0.08;
+    var lfoFreqGain = audioCtx.createGain(); lfoFreqGain.gain.value = 400;
+    lfoFreq.connect(lfoFreqGain); lfoFreqGain.connect(bpRain.frequency); lfoFreq.start();
+    currentLFOs.push(lfoFreq);
+    var rainGain = audioCtx.createGain(); rainGain.gain.value = 0.6;
+    var hpSplash = audioCtx.createBiquadFilter(); hpSplash.type = "highpass"; hpSplash.frequency.value = 3500;
+    var splashGain = audioCtx.createGain(); splashGain.gain.value = 0.2;
+    currentAudioSource.connect(lpRumble); lpRumble.connect(rumbleGain); rumbleGain.connect(masterGain);
+    currentAudioSource.connect(bpRain); bpRain.connect(rainGain); rainGain.connect(masterGain);
+    currentAudioSource.connect(hpSplash); hpSplash.connect(splashGain); splashGain.connect(masterGain);
+    currentAudioSource.start(0);
+  }
+
+  function playLockSound() {
+    if (!audioCtx) return;
+    var now = audioCtx.currentTime;
+    var oscClunk = audioCtx.createOscillator(); var gainClunk = audioCtx.createGain();
+    oscClunk.type = 'sine';
+    oscClunk.frequency.setValueAtTime(120, now);
+    oscClunk.frequency.exponentialRampToValueAtTime(40, now + 0.1);
+    gainClunk.gain.setValueAtTime(0.8, now);
+    gainClunk.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+    oscClunk.connect(gainClunk); gainClunk.connect(masterGain);
+    oscClunk.start(now); oscClunk.stop(now + 0.15);
+    var oscClick = audioCtx.createOscillator(); var gainClick = audioCtx.createGain();
+    oscClick.type = 'triangle';
+    oscClick.frequency.setValueAtTime(3000, now + 0.02);
+    oscClick.frequency.exponentialRampToValueAtTime(800, now + 0.05);
+    gainClick.gain.setValueAtTime(0.5, now + 0.02);
+    gainClick.gain.exponentialRampToValueAtTime(0.01, now + 0.06);
+    oscClick.connect(gainClick); gainClick.connect(masterGain);
+    oscClick.start(now + 0.02); oscClick.stop(now + 0.06);
+    var freqs = [1200, 1450, 2100, 2800];
+    freqs.forEach(function(freq) {
+      var oscRing = audioCtx.createOscillator(); var gainRing = audioCtx.createGain();
+      oscRing.type = 'sine';
+      oscRing.frequency.setValueAtTime(freq, now + 0.1);
+      gainRing.gain.setValueAtTime(0.15, now + 0.1);
+      gainRing.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+      oscRing.connect(gainRing); gainRing.connect(masterGain);
+      oscRing.start(now + 0.1); oscRing.stop(now + 0.4);
+    });
+    var bufferSize = audioCtx.sampleRate * 0.1;
+    var noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+    var noiseData = noiseBuffer.getChannelData(0);
+    for (var i = 0; i < bufferSize; i++) noiseData[i] = Math.random() * 2 - 1;
+    var noise = audioCtx.createBufferSource(); noise.buffer = noiseBuffer;
+    var noiseFilter = audioCtx.createBiquadFilter(); noiseFilter.type = 'bandpass'; noiseFilter.frequency.value = 2000; noiseFilter.Q.value = 1.5;
+    var noiseGain = audioCtx.createGain(); noiseGain.gain.setValueAtTime(0.4, now); noiseGain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+    noise.connect(noiseFilter); noiseFilter.connect(noiseGain); noiseGain.connect(masterGain);
+    noise.start(now);
+  }
+
+  function updateAudioForTheme() {
+    if (!audioCtx) return;
+    if (document.body.classList.contains("dark-theme")) { playRain(); initRainEffect(); }
+    else { playWind(); }
+  }
+
+  volSlider.addEventListener("input", function () {
+    currentVolume = parseFloat(this.value) / 100;
+    if (masterGain && audioCtx && !isMuted) {
+      var now = audioCtx.currentTime;
+      masterGain.gain.cancelScheduledValues(now);
+      masterGain.gain.setTargetAtTime(currentVolume, now, 0.05);
+    }
+  });
+
+  muteToggle.addEventListener("click", function (e) {
+    e.stopPropagation();
+    isMuted = !isMuted;
+    muteToggle.classList.toggle("muted", isMuted);
+    if (masterGain && audioCtx) {
+      var now = audioCtx.currentTime;
+      masterGain.gain.cancelScheduledValues(now);
+      masterGain.gain.setTargetAtTime(isMuted ? 0 : currentVolume, now, 0.05);
+    }
+  });
+
+  themeToggle.addEventListener("click", function (e) {
+    e.stopPropagation();
+    document.body.classList.toggle("dark-theme");
+    updateAudioForTheme();
+  });
+
+  var currentStep = 0;
+  var maxStep = 0;
+  var initialStarted = false;
+
+  function updateUI(isBack) {
+    [textBase, testText, prizeText].forEach(function(t) {
+      t.classList.remove('visible', 'melted', 'initial', 'dripping', 'reverse-melt', 'drips-static', 'is-melting', 'skip-anim');
+    });
+    document.querySelectorAll('.corner-btn').forEach(function(b) { b.classList.remove('show'); });
+    musicWrapper.classList.remove('active');
+    filmsWrapper.classList.remove('active');
+    gamesWrapper.classList.remove('active');
+    clothesWrapper.classList.remove('active');
+    if (currentStep !== 6) resetGamesWaveKey();
+    if (currentStep !== 7) isClothesAnswered = false;
+
+    if (currentStep === 0) {
+      isUnlocked = false;
+      if (isBack) { textBase.classList.add('reverse-melt'); textBase.classList.add('drips-static'); setTimeout(function() { textBase.classList.remove('drips-static'); }, 1200); }
+      else { textBase.classList.add('initial'); }
+    } else if (currentStep === 1) {
+      isUnlocked = false;
+      if (isBack) { testText.classList.add('reverse-melt'); testText.classList.add('drips-static'); setTimeout(function() { testText.classList.remove('drips-static'); }, 1200); }
+      else { testText.classList.add('visible'); }
+    } else if (currentStep === 2) {
+      isUnlocked = false;
+      if (isBack) { prizeText.classList.add('reverse-melt'); prizeText.classList.add('drips-static'); setTimeout(function() { prizeText.classList.remove('drips-static'); }, 1200); }
+      else { prizeText.classList.add('visible'); }
+    } else if (currentStep === 3) {
+      document.querySelectorAll('.corner-btn').forEach(function(btn, i) { setTimeout(function() { btn.classList.add('show'); }, i * 300); });
+      if (!hasLockAnimated) {
+        hasLockAnimated = true;
+        musicLock.classList.add('animating');
+        musicLock.classList.remove('unlocked');
+        setTimeout(playLockSound, 2500);
+        setTimeout(function() { isUnlocked = true; }, 4500);
+      } else { isUnlocked = true; musicLock.classList.remove('animating'); musicLock.classList.add('unlocked'); }
+      if (filmsLockAnimated) { if (filmsLock && !filmsLock.classList.contains('animating')) { filmsLock.classList.add('unlocked'); filmsUnlocked = true; } }
+      if (gamesLockAnimated) { if (gamesLock && !gamesLock.classList.contains('animating')) { gamesLock.classList.add('unlocked'); gamesUnlocked = true; } }
+      if (clothesLockAnimated) { if (clothesLock && !clothesLock.classList.contains('animating')) { clothesLock.classList.add('unlocked'); clothesUnlocked = true; } }
+      openFilmsLock();
+      openGamesLock();
+    } else if (currentStep === 4) {
+      musicWrapper.classList.add('active');
+      if (!isGameCompleted) startQuestion(currentQuestionIndex);
+    } else if (currentStep === 5) {
+      filmsWrapper.classList.add('active');
+      if (!isFilmGameCompleted) startFilmQuestion(currentFilmQuestionIndex);
+    } else if (currentStep === 6) {
+      gamesWrapper.classList.add('active');
+      if (!isGameGameCompleted) startGameQuestion(currentGameQuestionIndex);
+    } else if (currentStep === 7) {
+      isClothesAnswered = false;
+      resetClothesUI();
+      clothesWrapper.classList.add('active');
+    }
+
+    backBtn.classList.toggle('hidden', currentStep <= 0);
+    forwardBtn.classList.toggle('hidden', currentStep >= maxStep);
+  }
+
+  btnMusic.addEventListener("click", function(e) {
+    e.stopPropagation();
+    if (!isUnlocked || currentStep !== 3) return;
+    currentStep = 4;
+    maxStep = Math.max(maxStep, 4);
+    updateUI(false);
+  });
+
+  document.addEventListener('pointerdown', function (e) {
+    if (e.target.closest('.control-panel') || e.target.closest('.corner-btn') || e.target.closest('.music-page-wrapper') || e.target.closest('.films-page-wrapper') || e.target.closest('.games-page-wrapper') || e.target.closest('.clothes-page-wrapper') || e.target.closest('.raft-key') || e.target.closest('.dog-container') || e.target.closest('.dev-trigger') || e.target.closest('.dev-box') || e.target.closest('.book-overlay') || e.target.closest('.rope-container') || e.target.closest('.games-wave-key')) return;
+
+    if (currentStep === 0) {
+      if (!initialStarted) {
+        initialStarted = true;
+        startAudio();
+        document.body.classList.add("start-animation");
+        textBase.classList.add('is-melting');
+        setTimeout(function() {
+          textBase.classList.remove('initial');
+          textBase.classList.add('melted');
+          setTimeout(function() { currentStep = 1; maxStep = Math.max(maxStep, 1); updateUI(); }, 1200);
+        }, 1500);
+      } else {
+        textBase.classList.remove('initial', 'reverse-melt');
+        textBase.classList.add('is-melting');
+        setTimeout(function() {
+          textBase.classList.add('melted');
+          setTimeout(function() { currentStep = 1; maxStep = Math.max(maxStep, 1); updateUI(); }, 1200);
+        }, 1500);
+      }
+    } else if (currentStep === 1) {
+      testText.classList.add('dripping');
+      setTimeout(function() {
+        testText.classList.add('melted');
+        setTimeout(function() { currentStep = 2; maxStep = Math.max(maxStep, 2); updateUI(); }, 1200);
+      }, 300);
+    } else if (currentStep === 2) {
+      prizeText.classList.add('dripping');
+      setTimeout(function() {
+        prizeText.classList.add('melted');
+        setTimeout(function() { currentStep = 3; maxStep = Math.max(maxStep, 3); updateUI(); }, 1200);
+      }, 1200);
+    }
+  });
+
+  backBtn.addEventListener('click', function (e) { e.stopPropagation(); if (currentStep > 0) { currentStep--; updateUI(true); } });
+  forwardBtn.addEventListener('click', function (e) { e.stopPropagation(); if (currentStep < maxStep) { currentStep++; updateUI(false); } });
+
+  var devTrigger = document.getElementById('dev-trigger');
+  var devBox = document.getElementById('dev-box');
+  var devInput = document.getElementById('dev-input');
+
+  devTrigger.addEventListener('click', function(e) {
+    e.stopPropagation();
+    startAudio();
+    devBox.classList.toggle('open');
+    if (devBox.classList.contains('open')) devInput.focus();
+  });
+
+  devInput.addEventListener('click', function(e) { e.stopPropagation(); });
+
+  devInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+      var cmd = this.value.trim();
+      this.value = '';
+      executeDevCommand(cmd);
+    } else if (e.key === 'Escape') {
+      devBox.classList.remove('open');
+      this.blur();
+    }
+  });
+
+  function openBook() { devBox.classList.remove('open'); bookOverlay.classList.add('open'); }
+  function closeBook() { bookOverlay.classList.remove('open'); }
+  bookClose.addEventListener('click', function(e) { e.stopPropagation(); closeBook(); });
+  document.addEventListener('keydown', function(e) { if (e.key === 'Escape' && bookOverlay.classList.contains('open')) closeBook(); });
+
+  function refreshLastAnimation() {
+    if (currentStep === 0) {
+      if (!initialStarted) { initialStarted = true; startAudio(); document.body.classList.add("start-animation"); }
+      textBase.classList.remove('initial', 'melted', 'reverse-melt', 'is-melting', 'drips-static', 'skip-anim');
+      void textBase.offsetWidth;
+      textBase.classList.add('is-melting');
+      setTimeout(function() {
+        textBase.classList.remove('is-melting');
+        textBase.classList.add('melted');
+        setTimeout(function() { currentStep = 1; maxStep = Math.max(maxStep, 1); updateUI(false); }, 1200);
+      }, 1500);
+    } else if (currentStep === 1) {
+      testText.classList.remove('visible', 'melted', 'skip-anim', 'drips-static', 'dripping');
+      void testText.offsetWidth;
+      testText.classList.add('visible');
+    } else if (currentStep === 2) {
+      prizeText.classList.remove('visible', 'melted', 'skip-anim', 'drips-static', 'dripping');
+      void prizeText.offsetWidth;
+      prizeText.classList.add('visible');
+    } else if (currentStep === 3) {
+      if (clothesLockAnimated) { clothesLock.classList.remove('animating'); clothesLock.classList.add('unlocked'); }
+      else if (gamesLockAnimated) { gamesLock.classList.remove('animating'); gamesLock.classList.add('unlocked'); }
+      else if (filmsLockAnimated) { filmsLock.classList.remove('animating'); filmsLock.classList.add('unlocked'); }
+      else { musicLock.classList.remove('animating'); musicLock.classList.add('unlocked'); }
+      updateUI(false);
+    }
+  }
+
+  // ===== FULLSCREEN (как F11) =====
+  function tryFullscreen() {
+    var elem = document.documentElement;
+    try {
+      if (elem.requestFullscreen) {
+        elem.requestFullscreen().catch(function() {});
+      } else if (elem.webkitRequestFullscreen) {
+        elem.webkitRequestFullscreen();
+      } else if (elem.msRequestFullscreen) {
+        elem.msRequestFullscreen();
+      }
+    } catch (e) {}
+  }
+
+  // ===== GIF DURATION PARSER =====
+  function parseGifDuration(buffer) {
+    try {
+      var bytes = new Uint8Array(buffer);
+      if (bytes[0] !== 0x47 || bytes[1] !== 0x49 || bytes[2] !== 0x46) return null;
+      var pos = 6;
+      var packed = bytes[pos + 4];
+      pos += 7;
+      if (packed & 0x80) {
+        var gctSize = 2 << (packed & 0x07);
+        pos += gctSize * 3;
+      }
+      var totalDelay = 0;
+      while (pos < bytes.length) {
+        var blockType = bytes[pos];
+        if (blockType === 0x21) {
+          pos++;
+          var extType = bytes[pos];
+          pos++;
+          if (extType === 0xF9) {
+            var blockSize = bytes[pos];
+            pos++;
+            var delay = bytes[pos + 1] | (bytes[pos + 2] << 8);
+            totalDelay += delay * 10;
+            pos += blockSize;
+            pos++;
+          } else {
+            while (bytes[pos] !== 0) { pos += 1 + bytes[pos]; }
+            pos++;
+          }
+        } else if (blockType === 0x2C) {
+          pos++;
+          var imgPacked = bytes[pos + 8];
+          pos += 9;
+          if (imgPacked & 0x80) {
+            var lctSize = 2 << (imgPacked & 0x07);
+            pos += lctSize * 3;
+          }
+          pos++;
+          while (bytes[pos] !== 0) { pos += 1 + bytes[pos]; }
+          pos++;
+        } else if (blockType === 0x3B) {
+          break;
+        } else {
+          break;
+        }
+      }
+      return totalDelay > 0 ? totalDelay : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // ===== SCREAM SOUND =====
+  function playScreamSound() {
+    if (!audioCtx) {
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return;
+      try { audioCtx = new AC(); } catch (e) { return; }
+    }
+    if (audioCtx.state === 'suspended') audioCtx.resume().catch(function() {});
+
+    var now = audioCtx.currentTime;
+
+    var shaper = audioCtx.createWaveShaper();
+    var curve = new Float32Array(65536);
+    for (var i = 0; i < 65536; i++) {
+      var x = i * 2 / 65536 - 1;
+      curve[i] = Math.tanh(x * 6);
+    }
+    shaper.curve = curve;
+
+    var mainGain = audioCtx.createGain();
+    mainGain.gain.value = 0.42;
+    shaper.connect(mainGain);
+    mainGain.connect(audioCtx.destination);
+
+    var osc1 = audioCtx.createOscillator();
+    osc1.type = 'sawtooth';
+    osc1.frequency.setValueAtTime(900, now);
+    osc1.frequency.exponentialRampToValueAtTime(1700, now + 0.15);
+    osc1.frequency.linearRampToValueAtTime(1100, now + 0.7);
+    osc1.frequency.exponentialRampToValueAtTime(1900, now + 1.3);
+    osc1.frequency.linearRampToValueAtTime(1300, now + 2.0);
+    osc1.connect(shaper);
+    osc1.start(now);
+
+    var osc2 = audioCtx.createOscillator();
+    osc2.type = 'square';
+    osc2.frequency.setValueAtTime(600, now);
+    osc2.frequency.exponentialRampToValueAtTime(1400, now + 0.4);
+    osc2.frequency.linearRampToValueAtTime(800, now + 1.5);
+    osc2.connect(shaper);
+    osc2.start(now);
+
+    var lfo = audioCtx.createOscillator();
+    lfo.type = 'sine';
+    lfo.frequency.value = 7.5;
+    var lfoGain = audioCtx.createGain();
+    lfoGain.gain.value = 180;
+    lfo.connect(lfoGain);
+    lfoGain.connect(osc1.frequency);
+    lfoGain.connect(osc2.frequency);
+    lfo.start(now);
+
+    var noiseBuffer = audioCtx.createBuffer(1, audioCtx.sampleRate * 3, audioCtx.sampleRate);
+    var noiseData = noiseBuffer.getChannelData(0);
+    for (var j = 0; j < noiseData.length; j++) noiseData[j] = Math.random() * 2 - 1;
+    var noiseSource = audioCtx.createBufferSource();
+    noiseSource.buffer = noiseBuffer;
+    noiseSource.loop = true;
+    var noiseFilter = audioCtx.createBiquadFilter();
+    noiseFilter.type = 'bandpass';
+    noiseFilter.frequency.value = 2500;
+    noiseFilter.Q.value = 2;
+    var noiseGain = audioCtx.createGain();
+    noiseGain.gain.value = 0.3;
+    noiseSource.connect(noiseFilter);
+    noiseFilter.connect(noiseGain);
+    noiseGain.connect(mainGain);
+    noiseSource.start(now);
+
+    screamNodes = [osc1, osc2, lfo, noiseSource];
+  }
+
+  function stopScreamSound() {
+    screamNodes.forEach(function(n) {
+      try { n.stop(); } catch(e) {}
+      try { n.disconnect(); } catch(e) {}
+    });
+    screamNodes = [];
+  }
+
+  // ===== DEATH SCREEN SOUND =====
+  function playDeathSound() {
+    if (deathSoundStarted) return;
+    deathSoundStarted = true;
+
+    if (!audioCtx) {
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return;
+      try { audioCtx = new AC(); } catch (e) { return; }
+    }
+    if (audioCtx.state === 'suspended') audioCtx.resume().catch(function() {});
+
+    var now = audioCtx.currentTime;
+    var shaper = audioCtx.createWaveShaper();
+    var curve = new Float32Array(65536);
+    for (var i = 0; i < 65536; i++) {
+      var x = i * 2 / 65536 - 1;
+      curve[i] = Math.tanh(x * 4);
+    }
+    shaper.curve = curve;
+
+    var mainGain = audioCtx.createGain();
+    mainGain.gain.value = 0.4;
+    shaper.connect(mainGain);
+    mainGain.connect(audioCtx.destination);
+
+    var osc1 = audioCtx.createOscillator();
+    osc1.type = 'square';
+    osc1.frequency.value = 1000;
+    osc1.connect(shaper);
+    osc1.start(now);
+
+    var osc2 = audioCtx.createOscillator();
+    osc2.type = 'sawtooth';
+    osc2.frequency.value = 500;
+    osc2.connect(shaper);
+    osc2.start(now);
+
+    var osc3 = audioCtx.createOscillator();
+    osc3.type = 'square';
+    osc3.frequency.value = 1500;
+    osc3.connect(shaper);
+    osc3.start(now);
+
+    var lfo = audioCtx.createOscillator();
+    lfo.type = 'sine';
+    lfo.frequency.value = 6;
+    var lfoGain = audioCtx.createGain();
+    lfoGain.gain.value = 300;
+    lfo.connect(lfoGain);
+    lfoGain.connect(osc1.frequency);
+    lfoGain.connect(osc3.frequency);
+    lfo.start(now);
+
+    var noiseBuffer = audioCtx.createBuffer(1, audioCtx.sampleRate * 2, audioCtx.sampleRate);
+    var noiseData = noiseBuffer.getChannelData(0);
+    for (var j = 0; j < noiseData.length; j++) noiseData[j] = Math.random() * 2 - 1;
+    var noiseSource = audioCtx.createBufferSource();
+    noiseSource.buffer = noiseBuffer;
+    noiseSource.loop = true;
+    var noiseFilter = audioCtx.createBiquadFilter();
+    noiseFilter.type = 'bandpass';
+    noiseFilter.frequency.value = 2000;
+    noiseFilter.Q.value = 5;
+    var noiseGain = audioCtx.createGain();
+    noiseGain.gain.value = 0.15;
+    noiseSource.connect(noiseFilter);
+    noiseFilter.connect(noiseGain);
+    noiseGain.connect(mainGain);
+    noiseSource.start(now);
+  }
+
+  // ===== HORROR SEQUENCE =====
+  function startHorrorSequence() {
+    if (horrorTriggered) return;
+    horrorTriggered = true;
+
+    document.body.classList.add('horror-active');
+
+    var horrorOverlay = document.createElement('div');
+    horrorOverlay.id = 'horror-overlay';
+    document.body.appendChild(horrorOverlay);
+
+    var codeContainer = document.createElement('pre');
+    codeContainer.id = 'horror-code';
+    horrorOverlay.appendChild(codeContainer);
+
+    var codeChars = "!@#$%^&*()_+-=[]{}|;':\",./<>?`~0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz ";
+    var codeLines = [];
+    for (var i = 0; i < 300; i++) {
+      var line = '';
+      var lineLen = Math.floor(Math.random() * 60) + 20;
+      for (var j = 0; j < lineLen; j++) line += codeChars[Math.floor(Math.random() * codeChars.length)];
+      codeLines.push(line);
+    }
+    var fullCode = codeLines.join('\n');
+    var codeIndex = 0;
+
+    var startTime = Date.now();
+    var codeDuration = 5000;
+    var zryaShown = false;
+    var typeInterval;
+
+    function typeCode() {
+      if (!codeContainer.parentNode) { clearInterval(typeInterval); return; }
+      var elapsed = Date.now() - startTime;
+      if (elapsed >= codeDuration && !zryaShown) {
+        zryaShown = true;
+        showZrya();
+      }
+      if (codeIndex < fullCode.length) {
+        var targetIndex = Math.min(fullCode.length, Math.max(codeIndex + 1, Math.floor(fullCode.length * (Math.min(elapsed, codeDuration) / codeDuration))));
+        while (codeIndex < targetIndex) {
+          codeContainer.textContent += fullCode[codeIndex];
+          codeIndex++;
+        }
+        codeContainer.scrollTop = codeContainer.scrollHeight;
+      }
+    }
+
+    typeInterval = setInterval(typeCode, 30);
+
+    function showZrya() {
+      var zrya = document.createElement('div');
+      zrya.id = 'horror-zrya';
+      zrya.textContent = 'ЗРЯ';
+      horrorOverlay.appendChild(zrya);
+
+      setTimeout(function() {
+        clearInterval(typeInterval);
+        horrorOverlay.innerHTML = '';
+        showScreamer(horrorOverlay);
+      }, 1000);
+    }
+  }
+
+  function showScreamer(horrorOverlay) {
+    var src = 'https://media.tenor.com/IrsJg0xknJcAAAAM/screamer-creepy.gif';
+    var screamer = document.createElement('img');
+    screamer.id = 'horror-screamer';
+
+    var durationPromise = fetch(src)
+      .then(function(r) { return r.arrayBuffer(); })
+      .then(function(buf) {
+        var d = parseGifDuration(buf);
+        return d && d > 200 ? d : 3000;
+      })
+      .catch(function() { return 3000; });
+
+    var loadPromise = new Promise(function(resolve) {
+      screamer.onload = resolve;
+      screamer.onerror = resolve;
+    });
+
+    screamer.src = src;
+    horrorOverlay.appendChild(screamer);
+    playScreamSound();
+
+    Promise.all([durationPromise, loadPromise]).then(function(results) {
+      var duration = results[0];
+      setTimeout(function() {
+        stopScreamSound();
+        horrorOverlay.innerHTML = '';
+        var death = document.createElement('img');
+        death.id = 'horror-death';
+        death.src = 'https://cdn.lifehacker.ru/wp-content/uploads/2018/06/DeathScreen_1528185567.jpg';
+        horrorOverlay.appendChild(death);
+        playDeathSound();
+      }, duration);
+    });
+  }
+
+  function executeDevCommand(cmd) {
+    cmd = String(cmd || '').trim().toLowerCase();
+    if (!cmd) return;
+    if (cmd === '!book') { openBook(); return; }
+    if (cmd === '!refresh') { refreshLastAnimation(); return; }
+    if (cmd === '!back') { if (currentStep > 0) { currentStep--; updateUI(true); } return; }
+    if (cmd === '!skip') { if (currentStep < 3) { currentStep++; maxStep = Math.max(maxStep, currentStep); updateUI(false); } return; }
+
+    if (cmd === '!end') {
+      keyCollected = true;
+      ropeKeyCollected = true;
+      clothesKeyCollected = true;
+      hasLockAnimated = true;
+      filmsLockAnimated = true;
+      gamesLockAnimated = true;
+      clothesLockAnimated = true;
+      isUnlocked = true;
+      filmsUnlocked = true;
+      gamesUnlocked = true;
+      clothesUnlocked = true;
+      [musicLock, filmsLock, gamesLock, clothesLock].forEach(function(lock) {
+        if (lock) { lock.classList.remove('animating'); lock.classList.add('unlocked'); }
+      });
+      if (keyBadge) keyBadge.classList.remove('show');
+      currentStep = 3;
+      maxStep = Math.max(maxStep, 3);
+      updateUI(false);
+      return;
+    }
+
+    if (cmd === '!key1') {
+      keyCollected = true;
+      filmsLockAnimated = false;
+      filmsUnlocked = false;
+      if (keyBadge) keyBadge.classList.add('show');
+      if (currentStep === 3) openFilmsLock();
+      return;
+    }
+
+    if (cmd === '!key2') {
+      ropeKeyCollected = true;
+      gamesLockAnimated = false;
+      gamesUnlocked = false;
+      if (keyBadge) keyBadge.classList.add('show');
+      if (currentStep === 3) openGamesLock();
+      return;
+    }
+
+    if (cmd === '!key3') {
+      clothesKeyCollected = true;
+      clothesLockAnimated = false;
+      clothesUnlocked = false;
+      if (keyBadge) keyBadge.classList.add('show');
+      if (currentStep === 3) openClothesLock();
+      return;
+    }
+  }
+
+})();
+</script>
+</body>
+</html>
